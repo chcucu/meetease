@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  creatorName String   @default("Organizer")
+  allowSuggestions Boolean @default(true)
+  voteType    String   @default("single")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isPublished Boolean  @default(false)
+  shareCode   String   @unique
+
+  // 状态与截止
+  status       String   @default("open")       // open | closed | cancelled
+  deadline     DateTime?
+  category     String   @default("other")       // social | dinner | sport | travel | workshop | other
+
+  // 图片
+  imageUrl String?
+
+  // 费用
+  feeAmount      Float?
+  feeDescription String?
+  feeDeadline    DateTime?
+
+  // 活动主地点
+  locationName    String?
+  locationAddress String?
+  locationLat     Float?
+  locationLng     Float?
+
+  customFields     CustomField[]
+  timeOptions      TimeOption[]
+  locationOptions  LocationOption[]
+  suggestions      Suggestion[]
+  participants     Participant[]
+  rsvps            Rsvp[]
+  votes            Vote[]
+  payments         Payment[]
+}
+
+model CustomField {
+  id          String   @id @default(cuid())
+  activityId  String
+  label       String
+  fieldType   String
+  required    Boolean  @default(false)
+  options     String?
+  placeholder String?
+  sortOrder   Int      @default(0)
+  activity    Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+}
+
+model TimeOption {
+  id         String   @id @default(cuid())
+  activityId String
+  label      String
+  startTime  DateTime?
+  endTime    DateTime?
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  votes      Vote[]   @relation("TimeVote")
+}
+
+model LocationOption {
+  id         String   @id @default(cuid())
+  activityId String
+  name       String
+  address    String?
+  lat        Float?
+  lng        Float?
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  votes      Vote[]   @relation("LocationVote")
+}
+
+model Suggestion {
+  id         String   @id @default(cuid())
+  activityId String
+  content    String
+  authorName String   @default("Anonymous")
+  type       String
+  createdAt  DateTime @default(now())
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  votes      Vote[]   @relation("SuggestionVote")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Vote {
+  id               String   @id @default(cuid())
+  activityId       String
+  participantId    String
+  timeOptionId     String?
+  locationOptionId String?
+  suggestionId     String?
+  createdAt        DateTime @default(now())
+  activity         Activity     @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  participant      Participant  @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  timeOption       TimeOption?  @relation("TimeVote", fields: [timeOptionId], references: [id], onDelete: Cascade)
+  locationOption   LocationOption? @relation("LocationVote", fields: [locationOptionId], references: [id], onDelete: Cascade)
+  suggestion       Suggestion?     @relation("SuggestionVote", fields: [suggestionId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, timeOptionId])
+  @@unique([participantId, locationOptionId])
+  @@unique([participantId, suggestionId])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  activityId    String
+  participantId String
+  amount        Float
+  status        String   @default("unpaid")
+  paidAt        DateTime?
+  createdAt     DateTime @default(now())
+  activity      Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  participant   Participant   @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, activityId])
+}
+
+model Rsvp {
+  id            String   @id @default(cuid())
+  activityId    String
+  participantId String
+  response      String   @default("pending")    // pending | going | maybe | declined
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  activity      Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  participant   Participant   @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, activityId])
+}
+
+model Participant {
+  id            String   @id @default(cuid())
+  activityId    String
+  name          String
+  customData    String?
+  paid          Boolean  @default(false)
+  paidAt        DateTime?
+  rsvp          String   @default("pending")    // pending | going | maybe | declined
+  createdAt     DateTime @default(now())
+  activity      Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  votes         Vote[]
+  payments      Payment[]
+  rsvps         Rsvp[]
+}
