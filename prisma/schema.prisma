@@ -7,157 +7,141 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  activities   Activity[]
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
 model Activity {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  creatorName String   @default("Organizer")
-  allowSuggestions Boolean @default(true)
-  voteType    String   @default("single")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isPublished Boolean  @default(false)
-  shareCode   String   @unique
+  id               String   @id @default(cuid())
+  shareCode        String   @unique
+  ownerId          String
+  title            String
+  description      String   @default("")
+  category         String   @default("other")
+  status           String   @default("open") // open | closed
+  voteType         String   @default("single") // single | multiple
+  allowSuggestions Boolean  @default(true)
+  deadline         DateTime?
+  coverTheme       String   @default("lime")
+  coverImage       String?
+  locationName     String?
+  locationAddress  String?
+  locationLat      Float?
+  locationLng      Float?
+  feeAmount        Float?
+  feeNote          String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  // 状态与截止
-  status       String   @default("open")       // open | closed | cancelled
-  deadline     DateTime?
-  category     String   @default("other")       // social | dinner | sport | travel | workshop | other
+  owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  options      PollOption[]
+  fields       CustomField[]
+  suggestions  Suggestion[]
+  participants Participant[]
 
-  // 图片
-  imageUrl String?
+  @@index([ownerId, createdAt])
+}
 
-  // 费用
-  feeAmount      Float?
-  feeDescription String?
-  feeDeadline    DateTime?
+model PollOption {
+  id         String    @id @default(cuid())
+  activityId String
+  kind       String // time | place
+  label      String
+  note       String?
+  startsAt   DateTime?
+  endsAt     DateTime?
+  lat        Float?
+  lng        Float?
+  sortOrder  Int       @default(0)
+  activity   Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  votes      Vote[]
 
-  // 活动主地点
-  locationName    String?
-  locationAddress String?
-  locationLat     Float?
-  locationLng     Float?
-
-  customFields     CustomField[]
-  timeOptions      TimeOption[]
-  locationOptions  LocationOption[]
-  suggestions      Suggestion[]
-  participants     Participant[]
-  rsvps            Rsvp[]
-  votes            Vote[]
-  payments         Payment[]
+  @@index([activityId, kind])
 }
 
 model CustomField {
   id          String   @id @default(cuid())
   activityId  String
   label       String
-  fieldType   String
+  type        String   @default("text") // text | textarea | number | select | multi
   required    Boolean  @default(false)
-  options     String?
+  options     String? // JSON array of strings
   placeholder String?
   sortOrder   Int      @default(0)
   activity    Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-}
 
-model TimeOption {
-  id         String   @id @default(cuid())
-  activityId String
-  label      String
-  startTime  DateTime?
-  endTime    DateTime?
-  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  votes      Vote[]   @relation("TimeVote")
-}
-
-model LocationOption {
-  id         String   @id @default(cuid())
-  activityId String
-  name       String
-  address    String?
-  lat        Float?
-  lng        Float?
-  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  votes      Vote[]   @relation("LocationVote")
+  @@index([activityId])
 }
 
 model Suggestion {
-  id         String   @id @default(cuid())
+  id         String           @id @default(cuid())
   activityId String
   content    String
-  authorName String   @default("Anonymous")
-  type       String
-  createdAt  DateTime @default(now())
-  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  votes      Vote[]   @relation("SuggestionVote")
-}
+  authorName String           @default("匿名")
+  kind       String           @default("other") // time | place | other
+  createdAt  DateTime         @default(now())
+  activity   Activity         @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  votes      SuggestionVote[]
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Vote {
-  id               String   @id @default(cuid())
-  activityId       String
-  participantId    String
-  timeOptionId     String?
-  locationOptionId String?
-  suggestionId     String?
-  createdAt        DateTime @default(now())
-  activity         Activity     @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  participant      Participant  @relation(fields: [participantId], references: [id], onDelete: Cascade)
-  timeOption       TimeOption?  @relation("TimeVote", fields: [timeOptionId], references: [id], onDelete: Cascade)
-  locationOption   LocationOption? @relation("LocationVote", fields: [locationOptionId], references: [id], onDelete: Cascade)
-  suggestion       Suggestion?     @relation("SuggestionVote", fields: [suggestionId], references: [id], onDelete: Cascade)
-
-  @@unique([participantId, timeOptionId])
-  @@unique([participantId, locationOptionId])
-  @@unique([participantId, suggestionId])
-}
-
-model Payment {
-  id            String   @id @default(cuid())
-  activityId    String
-  participantId String
-  amount        Float
-  status        String   @default("unpaid")
-  paidAt        DateTime?
-  createdAt     DateTime @default(now())
-  activity      Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  participant   Participant   @relation(fields: [participantId], references: [id], onDelete: Cascade)
-
-  @@unique([participantId, activityId])
-}
-
-model Rsvp {
-  id            String   @id @default(cuid())
-  activityId    String
-  participantId String
-  response      String   @default("pending")    // pending | going | maybe | declined
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  activity      Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  participant   Participant   @relation(fields: [participantId], references: [id], onDelete: Cascade)
-
-  @@unique([participantId, activityId])
+  @@index([activityId, createdAt])
 }
 
 model Participant {
-  id            String   @id @default(cuid())
-  activityId    String
-  name          String
-  customData    String?
-  paid          Boolean  @default(false)
-  paidAt        DateTime?
-  rsvp          String   @default("pending")    // pending | going | maybe | declined
-  createdAt     DateTime @default(now())
-  activity      Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  votes         Vote[]
-  payments      Payment[]
-  rsvps         Rsvp[]
+  id              String           @id @default(cuid())
+  activityId      String
+  clientKey       String
+  name            String
+  answers         String? // JSON object
+  paid            Boolean          @default(false)
+  paidAt          DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  activity        Activity         @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  votes           Vote[]
+  suggestionVotes SuggestionVote[]
+
+  @@unique([activityId, clientKey])
+  @@index([activityId, createdAt])
+}
+
+model Vote {
+  id            String      @id @default(cuid())
+  participantId String
+  optionId      String
+  createdAt     DateTime    @default(now())
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  option        PollOption  @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, optionId])
+  @@index([optionId])
+}
+
+model SuggestionVote {
+  id            String      @id @default(cuid())
+  participantId String
+  suggestionId  String
+  createdAt     DateTime    @default(now())
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  suggestion    Suggestion  @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, suggestionId])
+  @@index([suggestionId])
 }

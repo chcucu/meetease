@@ -1,4 +1,4 @@
-import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
+import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
 
 const SALT_LEN = 32;
 const KEY_LEN = 64;
@@ -6,19 +6,22 @@ const SCRYPT_PARAMS = { N: 16384, r: 8, p: 1 };
 
 export function hashPassword(password: string): string {
   const salt = randomBytes(SALT_LEN).toString("hex");
-  const derivedKey = scryptSync(password, salt, KEY_LEN, SCRYPT_PARAMS);
-  return `${salt}:${derivedKey.toString("hex")}`;
+  const key = scryptSync(password, salt, KEY_LEN, SCRYPT_PARAMS);
+  return `${salt}:${key.toString("hex")}`;
 }
 
-export function verifyPassword(password: string, hash: string): boolean {
-  const [salt, key] = hash.split(":");
-  const derivedKey = scryptSync(password, salt, KEY_LEN, SCRYPT_PARAMS);
-  return timingSafeEqual(Buffer.from(key, "hex"), derivedKey);
+export function verifyPassword(password: string, stored: string): boolean {
+  const [salt, key] = stored.split(":");
+  if (!salt || !key) return false;
+  const derived = scryptSync(password, salt, KEY_LEN, SCRYPT_PARAMS);
+  const expected = Buffer.from(key, "hex");
+  return expected.length === derived.length && timingSafeEqual(expected, derived);
 }
 
-export function generateToken(): string {
-  return randomBytes(48).toString("hex");
+export function generateSessionToken(): string {
+  return randomBytes(32).toString("base64url");
 }
 
-export const AUTH_COOKIE = "meetease_token";
-export const AUTH_MAX_AGE = 7 * 24 * 60 * 60; // 7 days
+export function hashToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}

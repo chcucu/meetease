@@ -1,46 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { verifyPassword, generateToken, AUTH_COOKIE, AUTH_MAX_AGE } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { fail, ok, readBody } from "@/lib/api";
+import { verifyPassword } from "@/lib/auth";
+import { createSession, isSecureRequest, sessionCookieOptions, SESSION_COOKIE } from "@/lib/session";
+import { loginSchema } from "@/lib/validation";
 
-export async function POST(req: NextRequest) {
-  try {
-    const { email, password } = await req.json();
+export async function POST(request: Request) {
+  const data = await readBody(request, loginSchema);
+  if (data instanceof Response) return data;
 
-    if (!email || !password) {
-      return NextResponse.json({ success: false, error: "请填写邮箱和密码" }, { status: 400 });
-    }
-
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return NextResponse.json({ success: false, error: "邮箱或密码错误" }, { status: 401 });
-    }
-
-    if (!verifyPassword(password, user.password)) {
-      return NextResponse.json({ success: false, error: "邮箱或密码错误" }, { status: 401 });
-    }
-
-    const token = generateToken();
-
-    const sessionStore = globalThis as unknown as { __sessions: Map<string, string> };
-    if (!sessionStore.__sessions) sessionStore.__sessions = new Map();
-    sessionStore.__sessions.set(token, user.id);
-
-    const res = NextResponse.json({
-      success: true,
-      user: { id: user.id, email: user.email, name: user.name },
-    });
-
-    res.cookies.set(AUTH_COOKIE, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: AUTH_MAX_AGE,
-      path: "/",
-    });
-
-    return res;
-  } catch (err) {
-    console.error("Login error:", err);
-    return NextResponse.json({ success: false, error: "登录失败，请稍后重试" }, { status: 500 });
+  const user = await prisma.user.findUnique({ where: { email: data.email } });
+  if (!user || !verifyPassword(data.password, user.passwordHash)) {
+    return fail("邮箱或密码不正确", 401);
   }
+
+  await prisma.session.deleteMany({
+    where: { userId: user.id, expiresAt: { lt: new Date() } },
+  });
+
+  const { token } = await createSession(user.id);
+  const response = ok({ user: { id: user.id, name: user.name, email: user.email } });
+  response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions(isSecureRequest(request)));
+  return response;
 }

@@ -1,466 +1,670 @@
 import Link from "next/link";
-import MacWindow from "@/components/MacWindow";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  Clock3,
+  Download,
+  Link2,
+  MessageSquare,
+  ShieldCheck,
+  Wallet,
+  Zap,
+} from "lucide-react";
+import { HeroPoll } from "@/components/hero-poll";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { AvatarStack, SectionHeading } from "@/components/ui";
+
+const TICKER = [
+  "TIME / 时间",
+  "PLACE / 地点",
+  "BUDGET / 预算",
+  "DIET / 忌口",
+  "TRANSPORT / 交通",
+  "HEADCOUNT / 人数",
+  "DEADLINE / 截止",
+];
+
+const PROBLEMS = [
+  {
+    index: "01",
+    title: "刷屏",
+    body: "一个问题，三种意见，八十条消息。最后没人记得谁投过什么。",
+    meta: "消息 87 条 → 结论 0 个",
+  },
+  {
+    index: "02",
+    title: "沉默",
+    body: "最先回复的人定义了答案，剩下的人只是跟着点头。真正的偏好被淹没了。",
+    meta: "最先说话的人 ≠ 大多数人",
+  },
+  {
+    index: "03",
+    title: "散落",
+    body: "时间在聊天记录，地点在收藏夹，忌口在某个人的记忆里。临到头才发现漏了。",
+    meta: "4 个群 × 3 个话题 × 0 张清单",
+  },
+];
+
+const STEPS = [
+  {
+    index: "01",
+    kicker: "BUILD",
+    title: "建一张决策卡",
+    body: "时间、地点、预算、忌口，全放进去。选项可以多选，也可以只选一个。",
+  },
+  {
+    index: "02",
+    kicker: "SHARE",
+    title: "把链接发出去",
+    body: "不用拉群、不用注册、不用下载 App。打开链接，填名字，投票。",
+  },
+  {
+    index: "03",
+    kicker: "SETTLE",
+    title: "让结果自己出现",
+    body: "每一票实时汇总。谁还没投、谁已付款、什么最多人选，一眼看清。",
+  },
+];
 
 export default function HomePage() {
   return (
-    <div className="flex-1">
-      {/* ============ HERO ============ */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-meet-100 via-meet-50 to-white" aria-hidden="true" />
-
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-20 pb-28 lg:pt-28 lg:pb-36">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* 文案 */}
-            <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm text-meet-700 mb-8 anim-fade-up border border-meet-100">
-                <span className="w-2 h-2 rounded-full bg-meet-400 animate-pulse" />
-                <span className="font-medium">实时协作 / 免注册参与 / 全平台适配</span>
+    <>
+      <SiteHeader />
+      <main>
+        {/* Hero */}
+        <section className="relative overflow-hidden border-b border-line">
+          <div className="paper-grid pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
+          <div
+            className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] rounded-full bg-acid/30 blur-3xl"
+            aria-hidden="true"
+          />
+          <div className="container-page relative grid gap-14 pb-16 pt-12 md:pt-20 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:gap-16 lg:pb-24">
+            <div className="hero-in">
+              <div className="mb-7 flex flex-wrap items-center gap-3">
+                <span className="chip border-ink bg-acid">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-ink" />
+                  OPEN BETA
+                </span>
+                <span className="label text-[9px]">GROUP DECISION SYSTEM / 002</span>
               </div>
 
-              <h1 className="anim-fade-up" style={{ animationDelay: "0.1s" }}>
-                <span className="block font-display text-5xl sm:text-6xl lg:text-7xl leading-tight">
-                  <span className="text-meet-800">让聚会</span>
-                  <br />
-                  <span className="art-title">更简单</span>
+              <h1 className="page-title max-w-[640px] text-[clamp(2.9rem,7vw,5.4rem)]">
+                把一群人，
+                <br />
+                拧成一个
+                <span className="relative ml-1 inline-block whitespace-nowrap">
+                  <span className="absolute inset-x-0 bottom-[0.12em] h-[0.24em] -skew-x-6 bg-acid" aria-hidden="true" />
+                  <span className="relative serif-italic text-coral">答案</span>
                 </span>
+                。
               </h1>
 
-              <p className="mt-6 text-lg sm:text-xl text-meet-700/70 max-w-xl mx-auto lg:mx-0 anim-fade-up" style={{ animationDelay: "0.2s" }}>
-                <span className="font-semibold text-meet-600">MeetEase</span> 帮你搞定
-                动态表单、智能投票与实时决策。
-                告别群聊刷屏，几分钟定下大家都有空的时间与地点。
+              <p className="mt-7 max-w-[460px] text-[15px] leading-7 text-ink-2">
+                Quorum 是一张所有人共同填写的决策卡。时间、地点、预算、忌口 ——
+                一次说清，实时出结果，然后真的定下来。
               </p>
 
-              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start anim-fade-up" style={{ animationDelay: "0.3s" }}>
-                <Link
-                  href="/create"
-                  className="btn-sun text-white font-semibold px-8 py-3.5 rounded-2xl inline-flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                  </svg>
-                  创建活动
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Link href="/register" className="btn btn-primary">
+                  发起一次决策
+                  <ArrowRight size={16} />
                 </Link>
-                <Link
-                  href="#features"
-                  className="bg-white/70 backdrop-blur-sm text-meet-700 font-semibold px-8 py-3.5 rounded-2xl inline-flex items-center justify-center gap-2 hover:bg-white transition border border-meet-100"
-                >
-                  了解功能
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
+                <Link href="/a/DINNER" className="btn btn-ghost">
+                  看一场进行中的投票
+                  <ArrowUpRight size={15} />
                 </Link>
               </div>
 
-              <div className="mt-12 flex items-center justify-center lg:justify-start gap-10 anim-fade-up" style={{ animationDelay: "0.4s" }}>
+              <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 border-t border-line pt-5">
+                {["零注册参与", "实时同步", "一键导出"].map((item) => (
+                  <span key={item} className="flex items-center gap-2 text-[11px] text-muted">
+                    <span className="flex h-4 w-4 items-center justify-center border border-line-strong bg-surface">
+                      <Check size={10} strokeWidth={2.5} />
+                    </span>
+                    {item}
+                  </span>
+                ))}
+                <span className="font-mono text-[10px] tracking-wide text-muted/70">
+                  聚餐 · 团建 · 出行 · 读书会
+                </span>
+              </div>
+            </div>
+
+            <div className="hero-in lg:pl-4" style={{ animationDelay: "120ms" }}>
+              <HeroPoll />
+            </div>
+          </div>
+
+          <div className="overflow-hidden border-t border-line bg-paper-deep/50 py-3.5">
+            <div className="marquee-track">
+              {[0, 1].map((copy) => (
+                <div key={copy} className="flex shrink-0 items-center">
+                  {TICKER.map((item) => (
+                    <span
+                      key={`${copy}-${item}`}
+                      className="flex items-center gap-6 px-6 font-mono text-[10px] tracking-[0.16em] text-ink-2"
+                    >
+                      {item}
+                      <span className="text-coral">✳</span>
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Problem */}
+        <section className="container-page py-20 md:py-28">
+          <SectionHeading
+            index="01"
+            eyebrow="THE PROBLEM"
+            title={
+              <>
+                群聊擅长聊天，
+                <br />
+                不擅长<span className="serif-italic">做决定</span>。
+              </>
+            }
+            intro="一次普通的聚会，平均要在 4 个群、3 个话题里来回确认。Quorum 把这件事压缩成一张卡片。"
+          />
+
+          <div className="grid gap-px overflow-hidden border border-line bg-line md:grid-cols-3">
+            {PROBLEMS.map((item) => (
+              <article key={item.index} className="group relative bg-surface p-7 transition-colors hover:bg-acid-soft/40 md:p-8">
+                <div className="flex items-start justify-between">
+                  <span className="font-display text-[54px] leading-none text-line-strong transition-colors group-hover:text-ink/20">
+                    {item.index}
+                  </span>
+                  <span className="label text-[9px]">FAILURE MODE</span>
+                </div>
+                <h3 className="mt-8 font-display text-3xl">{item.title}</h3>
+                <p className="mt-3 min-h-[84px] text-sm leading-6 text-muted">{item.body}</p>
+                <p className="mt-6 border-t border-line pt-4 font-mono text-[10px] tracking-wide text-ink-2">
+                  {item.meta}
+                </p>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-10 flex flex-col items-start justify-between gap-5 border-l-2 border-acid pl-5 md:flex-row md:items-center">
+            <p className="max-w-[640px] font-display text-[clamp(1.4rem,2.6vw,2rem)] leading-snug">
+              “不是再来一个群，而是一张所有人共同填写的卡。”
+            </p>
+            <span className="label shrink-0 text-[9px]">— QUORUM, 2026</span>
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section id="how" className="border-y border-line bg-surface/60">
+          <div className="container-page py-20 md:py-28">
+            <SectionHeading
+              index="02"
+              eyebrow="HOW IT WORKS"
+              title={
+                <>
+                  三步，
+                  <span className="serif-italic">把话定下来</span>。
+                </>
+              }
+              intro="组织者花三分钟建卡，参与者花三十秒投票。剩下的交给系统。"
+            />
+
+            <div className="grid gap-6 lg:grid-cols-3">
+              {STEPS.map((step, index) => (
+                <div key={step.index} className="relative flex flex-col border border-line bg-paper p-6 md:p-7">
+                  <div className="mb-7 flex items-center justify-between">
+                    <span className="font-display text-[42px] leading-none">{step.index}</span>
+                    <span className="chip text-[8px]">{step.kicker}</span>
+                  </div>
+
+                  <div className="mb-6 flex h-[150px] items-center justify-center border border-line bg-surface p-4">
+                    {index === 0 && <MiniForm />}
+                    {index === 1 && <MiniShare />}
+                    {index === 2 && <MiniResults />}
+                  </div>
+
+                  <h3 className="font-display text-2xl">{step.title}</h3>
+                  <p className="mt-2.5 text-sm leading-6 text-muted">{step.body}</p>
+
+                  {index < 2 && (
+                    <span className="absolute -right-3 top-1/2 z-10 hidden h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-ink bg-acid text-ink lg:flex">
+                      <ArrowRight size={12} />
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section id="features" className="container-page py-20 md:py-28">
+          <SectionHeading
+            index="03"
+            eyebrow="CAPABILITIES"
+            title={
+              <>
+                小工具，
+                <br />
+                但是每个细节都
+                <span className="serif-italic">想过了</span>。
+              </>
+            }
+            intro="从发起、投票、收款到导出，一条完整的闭环。没有多余的功能，只有必须做对的细节。"
+          />
+
+          <div className="grid gap-4 md:grid-cols-12">
+            <FeatureCard
+              index="01"
+              icon={<Zap size={18} />}
+              title="结果实时出现"
+              body="投票通过 SSE 推送到结果页。组织者不用刷新，也不用再问「现在几票了」。"
+              className="md:col-span-7"
+            >
+              <div className="space-y-2.5">
                 {[
-                  ["3 步", "搞定一场活动"],
-                  ["0 注册", "参与零门槛"],
-                  ["实时", "投票即见"],
-                ].map(([num, label]) => (
-                  <div key={num} className="text-center">
-                    <div className="text-2xl font-bold text-meet-700">{num}</div>
-                    <div className="text-xs text-meet-500/70 mt-1">{label}</div>
+                  { label: "周六 17:30", value: 62, count: 5 },
+                  { label: "周六 19:00", value: 25, count: 2 },
+                  { label: "周日 12:00", value: 13, count: 1 },
+                ].map((row, index) => (
+                  <div key={row.label} className="flex items-center gap-3">
+                    <span className="w-[86px] shrink-0 text-[11px]">{row.label}</span>
+                    <span className="h-2.5 flex-1 overflow-hidden bg-paper-deep">
+                      <span
+                        className={`block h-full ${index === 0 ? "bg-ink" : "bg-ink/25"}`}
+                        style={{ width: `${row.value}%` }}
+                      />
+                    </span>
+                    <span className="w-8 text-right font-mono text-[10px]">{row.count} 票</span>
                   </div>
                 ))}
-              </div>
-            </div>
-
-            {/* macOS 窗口演示 */}
-            <div className="relative anim-fade-up" style={{ animationDelay: "0.25s" }}>
-              <div className="absolute -inset-4 bg-gradient-to-br from-meet-200/40 to-meet-100/40 rounded-[32px] blur-2xl" aria-hidden="true" />
-              <MacWindow title="MeetEase 聚会 - 周末烧烤局" className="relative rotate-1 hover:rotate-0 transition-transform duration-500">
-                <div className="p-6 space-y-4">
-                  <div>
-                    <h3 className="font-display text-xl text-meet-800">周末烧烤局</h3>
-                    <p className="text-sm text-meet-600/60 mt-1">选个大家都方便的时间，一起去海边烧烤吧！</p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-semibold text-meet-600 mb-2">选择时间</p>
-                    <div className="space-y-2">
-                      {[
-                        { label: "周六 17:00 - 21:00", votes: 8, best: true },
-                        { label: "周日 16:00 - 20:00", votes: 5, best: false },
-                        { label: "周五 18:30 - 22:00", votes: 3, best: false },
-                      ].map((opt) => (
-                        <div
-                          key={opt.label}
-                          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border ${
-                            opt.best
-                              ? "border-meet-200 bg-gradient-to-r from-meet-50 to-white"
-                              : "border-meet-100 bg-white/60"
-                          }`}
-                        >
-                          <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                            opt.best ? "border-meet-500 bg-meet-500" : "border-meet-300"
-                          }`}>
-                            {opt.best && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                          </span>
-                          <span className="text-sm text-meet-800 flex-1">{opt.label}</span>
-                          {opt.best && (
-                            <span className="text-[10px] font-semibold text-meet-600 bg-meet-50 px-2 py-0.5 rounded-full">
-                              {opt.votes} 票 / 最优
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-semibold text-meet-600 mb-2">选择地点</p>
-                    <div className="flex gap-2">
-                      {["海边公园", "天台烧烤", "河畔营地"].map((loc, i) => (
-                        <div
-                          key={loc}
-                          className={`flex-1 text-center px-2 py-2.5 rounded-xl border text-xs ${
-                            i === 0 ? "border-meet-200 bg-meet-50 text-meet-700" : "border-meet-100 bg-white/60 text-meet-600"
-                          }`}
-                        >
-                          {loc}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 pt-1">
-                    <div className="flex-1 bg-meet-500 text-white text-sm font-semibold py-2.5 rounded-xl text-center">
-                      提交投票
-                    </div>
-                    <div className="bg-white/70 backdrop-blur-sm text-meet-700 text-sm font-semibold py-2.5 rounded-xl text-center px-4 border border-meet-100">
-                      实时结果
-                    </div>
-                  </div>
-                </div>
-              </MacWindow>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ 功能 ============ */}
-      <section id="features" className="bg-white relative">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-24">
-          <div className="text-center mb-16">
-            <span className="inline-block font-semibold text-meet-500 text-sm tracking-widest mb-3">FEATURES</span>
-            <h2 className="font-display text-4xl sm:text-5xl text-meet-800">
-              一切，为聚会而生
-            </h2>
-            <p className="mt-4 text-lg text-meet-600/70 max-w-2xl mx-auto">
-              从动态表单到实时投票，我们提供组织聚会所需的全部工具。
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((f, i) => (
-              <div
-                key={f.title}
-                className="bg-white rounded-3xl p-7 border border-meet-100 hover:border-meet-200 hover:shadow-lg hover:shadow-meet-100/50 transition-all duration-300 anim-fade-up"
-                style={{ animationDelay: `${i * 0.08}s` }}
-              >
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-meet-400 to-meet-600 flex items-center justify-center mb-5 shadow-lg shadow-meet-200/40">
-                  {f.icon}
-                </div>
-                <h3 className="font-display text-xl text-meet-800 mb-2">{f.title}</h3>
-                <p className="text-sm text-meet-600/70 leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============ 怎么用 ============ */}
-      <section id="how" className="relative bg-meet-50/50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-24">
-          <div className="text-center mb-16">
-            <span className="inline-block font-semibold text-meet-500 text-sm tracking-widest mb-3">HOW IT WORKS</span>
-            <h2 className="font-display text-4xl sm:text-5xl text-meet-800">
-              三步搞定一场聚会
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {steps.map((s, i) => (
-              <div key={s.title} className="relative anim-fade-up" style={{ animationDelay: `${i * 0.12}s` }}>
-                {i < 2 && (
-                  <div className="hidden md:block absolute top-10 left-[calc(50%+3rem)] w-[calc(100%-6rem)] h-px bg-meet-200" aria-hidden="true" />
-                )}
-                <div className="bg-white rounded-3xl p-8 text-center border border-meet-100 hover:border-meet-200 transition-all duration-300">
-                  <div className="relative w-20 h-20 mx-auto mb-6">
-                    <div className="absolute inset-0 bg-meet-100 rounded-full blur-lg" aria-hidden="true" />
-                    <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-meet-300 to-meet-500 flex items-center justify-center shadow-lg shadow-meet-200/50">
-                      <span className="font-bold text-2xl text-white">{i + 1}</span>
-                    </div>
-                  </div>
-                  <h3 className="font-display text-xl text-meet-800 mb-3">{s.title}</h3>
-                  <p className="text-sm text-meet-600/70 leading-relaxed">{s.desc}</p>
+                <div className="flex items-center justify-between pt-2 font-mono text-[9px] text-muted">
+                  <span className="flex items-center gap-1.5">
+                    <span className="live-dot" /> 刚刚 · 阿策投了「周六 17:30」
+                  </span>
+                  <span>SSE CONNECTED</span>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </FeatureCard>
 
-      {/* ============ 全站业务一览 ============ */}
-      <section id="business" className="bg-white relative">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-24">
-          <div className="text-center mb-16">
-            <span className="inline-block font-semibold text-meet-500 text-sm tracking-widest mb-3">FULL PRODUCT</span>
-            <h2 className="font-display text-4xl sm:text-5xl text-meet-800">
-              全站业务，完整闭环
-            </h2>
-            <p className="mt-4 text-lg text-meet-600/70 max-w-2xl mx-auto">
-              从创建到决策，从分享到导出，每一个环节都已就绪。
-            </p>
-          </div>
-
-          <MacWindow title="MeetEase · 业务闭环" className="max-w-5xl mx-auto">
-            {/* 业务闭环流程 */}
-            <div className="p-6 sm:p-8">
-              <div className="grid sm:grid-cols-5 gap-3 mb-10">
-                {flowSteps.map((step, i) => (
-                  <div key={step.title} className="relative text-center">
-                    {i < flowSteps.length - 1 && (
-                      <div className="hidden sm:block absolute top-7 left-[calc(50%+1.75rem)] w-[calc(100%-3.5rem)] h-px bg-meet-200" aria-hidden="true" />
-                    )}
-                    <div className="relative w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-meet-400 to-meet-600 flex items-center justify-center shadow-lg shadow-meet-200/50 mb-3">
-                      {step.icon}
-                    </div>
-                    <div className="text-sm font-semibold text-meet-800">{step.title}</div>
-                    <div className="text-[11px] text-meet-500/70 mt-1 leading-relaxed whitespace-pre-line">{step.desc}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* 已实现功能模块 */}
-              <div className="rounded-2xl border border-meet-100 bg-meet-50/40 p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="font-display text-lg text-meet-800">已实现功能模块</h3>
-                  <span className="text-xs font-semibold text-meet-600 bg-meet-100 px-3 py-1 rounded-full">
-                    共 {modules.length} 项
+            <FeatureCard
+              index="02"
+              icon={<Link2 size={18} />}
+              title="零注册参与"
+              body="一个链接或二维码。参与者只需填名字，不必创建账号。"
+              className="md:col-span-5"
+            >
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2 border border-line-strong bg-paper px-3 py-2">
+                  <Link2 size={13} className="text-muted" />
+                  <span className="truncate font-mono text-[10px]">quorum.app/a/DINNER</span>
+                </div>
+                <div className="flex items-center justify-between border border-line-strong bg-paper px-3 py-2">
+                  <span className="font-mono text-[9px] tracking-wide text-muted">扫码打开</span>
+                  <span className="grid grid-cols-4 gap-0.5" aria-hidden="true">
+                    {Array.from({ length: 16 }).map((_, i) => (
+                      <span
+                        key={i}
+                        className={`block h-1.5 w-1.5 ${[0, 2, 5, 7, 8, 10, 13, 15, 3, 12].includes(i) ? "bg-ink" : "bg-transparent"}`}
+                      />
+                    ))}
                   </span>
                 </div>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                  {modules.map((m) => (
-                    <div key={m} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white border border-meet-100 text-sm text-meet-800">
-                      <span className="w-2 h-2 rounded-full bg-meet-500 shrink-0" />
-                      {m}
+              </div>
+            </FeatureCard>
+
+            <FeatureCard
+              index="03"
+              icon={<Clock3 size={18} />}
+              title="时间 × 地点"
+              body="两类选项分开投，单选或多选都行。地点还能附上地图坐标。"
+              className="md:col-span-4"
+            >
+              <div className="flex flex-wrap gap-2">
+                <span className="chip bg-acid-soft">TIME · 周六 17:30</span>
+                <span className="chip bg-paper">PLACE · 梧桐小院</span>
+                <span className="chip bg-paper">单选 / 多人同投</span>
+              </div>
+            </FeatureCard>
+
+            <FeatureCard
+              index="04"
+              icon={<MessageSquare size={18} />}
+              title="自定义问题"
+              body="忌口、交通、是否带伴。文本、数字、单选、多选，按需添加。"
+              className="md:col-span-4"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between border border-line bg-paper px-2.5 py-2 text-[10px]">
+                  <span>有没有忌口？</span>
+                  <span className="font-mono text-muted">SELECT</span>
+                </div>
+                <div className="flex items-center justify-between border border-line bg-paper px-2.5 py-2 text-[10px]">
+                  <span>怎么过去？</span>
+                  <span className="font-mono text-muted">TEXT</span>
+                </div>
+              </div>
+            </FeatureCard>
+
+            <FeatureCard
+              index="05"
+              icon={<Wallet size={18} />}
+              title="费用与到场"
+              body="记录人均费用，勾选谁已支付。谁还没回，一眼就看得到。"
+              className="md:col-span-4"
+            >
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between font-mono text-[10px]">
+                  <span>已收 ¥1,008 / ¥1,512</span>
+                  <span className="text-coral">67%</span>
+                </div>
+                <div className="h-2 bg-paper-deep">
+                  <div className="h-full w-2/3 bg-coral" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <AvatarStack names={["阿策", "Momo", "小满", "Nina"]} max={4} />
+                  <span className="font-mono text-[9px] text-muted">6 / 9 PAID</span>
+                </div>
+              </div>
+            </FeatureCard>
+
+            <FeatureCard
+              index="06"
+              icon={<Download size={18} />}
+              title="CSV 导出"
+              body="参与者、选择、回答、支付状态，一次导出，直接进表格。"
+              className="md:col-span-6"
+            >
+              <div className="border border-line bg-paper p-3 font-mono text-[9px] leading-5 text-muted">
+                <p className="text-ink">quorum-DINNER.csv</p>
+                <p>姓名, 时间, 地点, 忌口, 支付</p>
+                <p>阿策, 周六 17:30, 梧桐小院, 无, 已支付</p>
+                <p>Ken, 周六 19:00, 江边炭火, 素食, 未支付</p>
+              </div>
+            </FeatureCard>
+
+            <FeatureCard
+              index="07"
+              icon={<ShieldCheck size={18} />}
+              title="只有你能关票"
+              body="组织者拥有独立账号。投票链接公开，管理权限不公开。"
+              className="md:col-span-6"
+            >
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="border border-line bg-paper p-3">
+                  <p className="label mb-1 text-[8px]">PUBLIC LINK</p>
+                  <p className="text-[11px]">任何人都能投票</p>
+                </div>
+                <div className="border border-ink bg-ink p-3 text-paper">
+                  <p className="label mb-1 text-[8px] text-paper/50">OWNER ONLY</p>
+                  <p className="flex items-center gap-1.5 text-[11px]">
+                    <Check size={11} className="text-acid" /> 关票 · 收款 · 删除
+                  </p>
+                </div>
+              </div>
+            </FeatureCard>
+          </div>
+        </section>
+
+        {/* Live section */}
+        <section id="live" className="section-ink relative overflow-hidden border-y border-ink">
+          <div className="dotted-grid pointer-events-none absolute inset-0 opacity-40" aria-hidden="true" />
+          <div
+            className="pointer-events-none absolute -left-20 top-10 h-72 w-72 rounded-full bg-acid/15 blur-3xl"
+            aria-hidden="true"
+          />
+          <div className="container-page relative py-20 md:py-28">
+            <SectionHeading
+              dark
+              index="04"
+              eyebrow="LIVE RESULTS"
+              title={
+                <>
+                  结果不是投票结束后
+                  <br />
+                  才出现的。
+                </>
+              }
+              intro="每一票都会实时进入结果页。谁投了什么、谁还没来、哪里最多人选，随时可见。"
+              action={{ href: "/a/DINNER/results", label: "打开一个实时结果页" }}
+            />
+
+            <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+              <div className="space-y-6">
+                {[
+                  {
+                    title: "不用刷新",
+                    body: "SSE 长连接把新票推给所有打开结果页的人。页面上那个小圆点，是真的在跳。",
+                  },
+                  {
+                    title: "不用追问",
+                    body: "每个人选了什么、谁还没提交，名单清清楚楚。不用再在群里 @ 所有人。",
+                  },
+                  {
+                    title: "不用手动关",
+                    body: "到了截止时间自动停止收票；组织者也可以提前手动关闭，把结果锁住。",
+                  },
+                ].map((item, index) => (
+                  <div key={item.title} className="flex gap-4">
+                    <span className="font-mono text-[10px] text-acid/70">0{index + 1}</span>
+                    <div>
+                      <h3 className="font-display text-xl text-paper">{item.title}</h3>
+                      <p className="mt-1 max-w-[380px] text-sm leading-6 text-paper/55">{item.body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="relative border border-paper/20 bg-paper p-5 text-ink shadow-[8px_8px_0_rgba(217,255,67,0.9)] sm:p-6">
+                <div className="flex items-start justify-between border-b border-line pb-4">
+                  <div>
+                    <p className="label mb-1 text-[8px]">LIVE RESULT / DINNER</p>
+                    <h3 className="font-display text-2xl">周六，去城外吃一顿</h3>
+                  </div>
+                  <div className="flex items-center gap-1.5 border border-line bg-paper px-2 py-1">
+                    <span className="live-dot" />
+                    <span className="font-mono text-[9px]">LIVE</span>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-end justify-between">
+                  <div>
+                    <p className="label text-[9px]">目前最多人选</p>
+                    <p className="mt-1 font-display text-3xl">周六 17:30</p>
+                  </div>
+                  <p className="font-display text-[52px] leading-none text-coral">5</p>
+                </div>
+
+                <div className="mt-5 space-y-3">
+                  {[
+                    { label: "周六 17:30", count: 5, width: "62%" },
+                    { label: "周六 19:00", count: 2, width: "25%" },
+                    { label: "周日 12:00", count: 1, width: "13%" },
+                  ].map((row, index) => (
+                    <div key={row.label}>
+                      <div className="mb-1 flex items-center justify-between text-[11px]">
+                        <span>{row.label}</span>
+                        <span className="font-mono text-muted">{row.count} / 8</span>
+                      </div>
+                      <div className="h-2.5 bg-paper-deep">
+                        <div
+                          className={`h-full ${index === 0 ? "bg-coral" : "bg-ink/20"}`}
+                          style={{ width: row.width }}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
+
+                <div className="mt-5 flex items-center justify-between border-t border-line pt-4">
+                  <AvatarStack names={["阿策", "Momo", "周周", "Ken", "小满", "阿栗", "Nina", "老丁", "羽佳"]} max={7} />
+                  <span className="font-mono text-[9px] text-muted">9 人已参与</span>
+                </div>
               </div>
             </div>
-          </MacWindow>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* ============ CTA ============ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-meet-500 to-meet-600">
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-20 text-center">
-          <h2 className="font-display text-4xl sm:text-5xl text-white">
-            现在就创建你的聚会
-          </h2>
-          <p className="mt-4 text-lg text-white/80">
-            免费、免注册、几分钟搞定。参与者只需一个链接。
-          </p>
-          <Link
-            href="/create"
-            className="mt-8 inline-flex items-center gap-2 bg-white text-meet-600 font-bold px-10 py-4 rounded-2xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            开始创建
-          </Link>
-        </div>
-      </section>
+        {/* Final CTA */}
+        <section className="relative overflow-hidden bg-acid">
+          <div className="paper-grid pointer-events-none absolute inset-0 opacity-25" aria-hidden="true" />
+          <div className="container-page relative py-20 md:py-28">
+            <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
+              <div>
+                <p className="label mb-6 text-[9px] text-ink/60">READY WHEN YOU ARE</p>
+                <h2 className="font-display text-[clamp(2.6rem,7vw,6rem)] leading-[0.95] tracking-[-0.04em]">
+                  下一次，
+                  <br />
+                  别再说
+                  <span className="serif-italic">「都行」</span>。
+                </h2>
+                <p className="mt-6 max-w-[430px] text-sm leading-6 text-ink/70">
+                  建一张卡，发一个链接。三分钟后，你会知道大家到底想要什么。
+                </p>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <Link href="/register" className="btn btn-dark">
+                    免费创建账号
+                    <ArrowRight size={16} />
+                  </Link>
+                  <Link href="/login" className="btn border-ink bg-transparent">
+                    用演示账号体验
+                  </Link>
+                </div>
+              </div>
 
-      {/* ============ 页脚 ============ */}
-      <footer className="bg-meet-900 text-meet-300/70">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14">
-          <div className="grid md:grid-cols-4 gap-10">
-            {/* 品牌 */}
-            <div className="md:col-span-1">
-              <p className="font-display text-xl text-white mb-2">MeetEase 聚会</p>
-              <p className="text-sm leading-relaxed">专业活动组织平台。动态表单、智能投票、实时决策，让组织更简单，让参与更自由。</p>
-            </div>
-
-            {/* 快速导航 */}
-            <div>
-              <p className="text-sm font-semibold text-white mb-4">快速导航</p>
-              <ul className="space-y-2.5 text-sm">
-                <li><Link href="/" className="hover:text-white transition">首页</Link></li>
-                <li><Link href="/create" className="hover:text-white transition">创建活动</Link></li>
-                <li><Link href="/dashboard" className="hover:text-white transition">我的活动</Link></li>
-                <li><Link href="/#business" className="hover:text-white transition">全站业务</Link></li>
-              </ul>
-            </div>
-
-            {/* 产品 */}
-            <div>
-              <p className="text-sm font-semibold text-white mb-4">产品功能</p>
-              <ul className="space-y-2.5 text-sm">
-                <li><Link href="/#features" className="hover:text-white transition">动态表单</Link></li>
-                <li><Link href="/#features" className="hover:text-white transition">智能投票</Link></li>
-                <li><Link href="/#features" className="hover:text-white transition">实时结果</Link></li>
-                <li><Link href="/#features" className="hover:text-white transition">地图选点</Link></li>
-              </ul>
-            </div>
-
-            {/* 联系与开源 */}
-            <div>
-              <p className="text-sm font-semibold text-white mb-4">联系与开源</p>
-              <ul className="space-y-2.5 text-sm">
-                <li>
-                  <a
-                    href="https://github.com/chcucu/meetease"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 hover:text-white transition"
-                  >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.7-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.63.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.36 9.36 0 015 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.59.69.49A10.02 10.02 0 0022 12.25C22 6.58 17.52 2 12 2z" />
-                    </svg>
-                    GitHub 开源仓库
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="mailto:chenjh8557@outlook.com"
-                    className="inline-flex items-center gap-2 hover:text-white transition"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    chenjh8557@outlook.com
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://github.com/chcucu/meetease/issues"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 hover:text-white transition"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 0V16.5a3 3 0 11-5.367 2.684 3 3 0 015.367-2.684z" />
-                    </svg>
-                    反馈与建议
-                  </a>
-                </li>
-              </ul>
+              <div className="relative hidden h-[210px] w-[210px] shrink-0 items-center justify-center lg:flex">
+                <div className="spin-slow absolute inset-0 rounded-full border border-dashed border-ink/40" />
+                <div className="absolute inset-5 rounded-full border border-ink/30" />
+                <div className="flex h-28 w-28 rotate-[-8deg] flex-col items-center justify-center border border-ink bg-paper shadow-[4px_4px_0_#171714]">
+                  <span className="font-display text-4xl">Q</span>
+                  <span className="font-mono text-[8px] tracking-[0.2em]">SETTLED</span>
+                </div>
+              </div>
             </div>
           </div>
+        </section>
+      </main>
+      <SiteFooter />
+    </>
+  );
+}
 
-          {/* 底部版权行 */}
-          <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-            <p>&copy; 2026 MeetEase 聚会 · 让聚会更简单</p>
-            <p className="flex items-center gap-4">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-meet-gold-400" />
-                开源项目 · MIT License
-              </span>
-              <span>v0.1.0</span>
-              <span>地图数据 &copy; 高德地图</span>
-            </p>
-          </div>
-        </div>
-      </footer>
+function FeatureCard({
+  index,
+  icon,
+  title,
+  body,
+  children,
+  className = "",
+}: {
+  index: string;
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <article
+      className={`group flex flex-col border border-line bg-surface p-5 transition-all duration-200 hover:border-ink hover:shadow-[4px_4px_0_rgba(23,23,20,0.9)] md:p-6 ${className}`}
+    >
+      <div className="mb-5 flex items-start justify-between">
+        <span className="flex h-9 w-9 items-center justify-center border border-line-strong bg-paper">
+          {icon}
+        </span>
+        <span className="font-mono text-[9px] tracking-wide text-muted">{index}</span>
+      </div>
+      <div className="mb-4 flex-1 rounded-sm border border-line bg-paper/70 p-4">{children}</div>
+      <h3 className="font-display text-[22px] leading-tight">{title}</h3>
+      <p className="mt-2 text-[13px] leading-6 text-muted">{body}</p>
+    </article>
+  );
+}
+
+function MiniForm() {
+  return (
+    <div className="w-full space-y-2">
+      <div className="flex items-center justify-between border border-ink bg-surface px-2.5 py-1.5">
+        <span className="text-[10px] font-medium">周六，去城外吃一顿</span>
+        <span className="font-mono text-[8px] text-muted">TITLE</span>
+      </div>
+      <div className="flex items-center justify-between border border-line bg-surface px-2.5 py-1.5">
+        <span className="text-[10px]">周六 17:30</span>
+        <span className="font-mono text-[8px] text-muted">TIME</span>
+      </div>
+      <div className="flex items-center justify-between border border-line bg-surface px-2.5 py-1.5">
+        <span className="text-[10px]">梧桐小院</span>
+        <span className="font-mono text-[8px] text-muted">PLACE</span>
+      </div>
+      <div className="flex items-center justify-between border border-dashed border-line-strong px-2.5 py-1.5">
+        <span className="text-[10px] text-muted">+ 添加问题</span>
+        <span className="font-mono text-[8px] text-muted">OPTIONAL</span>
+      </div>
     </div>
   );
 }
 
-const features = [
-  {
-    title: "动态表单",
-    desc: "拖拽式自定义收集字段：文本、单选、多选、数字，还能设置必填与条件联动。",
-    icon: <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
-  },
-  {
-    title: "智能投票",
-    desc: "时间、地点、自定义选项一键投票，单选多选随心配，实时计票自动高亮最优选项。",
-    icon: <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
-  },
-  {
-    title: "自由提议",
-    desc: "参与者可以提出新时间、新地点，大家一起投票决定，让决策真正民主。",
-    icon: <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>,
-  },
-  {
-    title: "实时同步",
-    desc: "投票结果毫秒级同步到所有设备，打开结果页就能看到实时变化。",
-    icon: <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>,
-  },
-  {
-    title: "免注册参与",
-    desc: "参与者通过链接即可加入，无需注册、无需下载，零门槛参与。",
-    icon: <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>,
-  },
-  {
-    title: "全平台适配",
-    desc: "移动优先设计，从折叠屏到带鱼屏都能完美呈现，触控友好。",
-    icon: <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>,
-  },
-];
+function MiniShare() {
+  return (
+    <div className="w-full space-y-3">
+      <div className="flex items-center gap-2 border border-line-strong bg-surface px-2.5 py-2">
+        <Link2 size={11} className="text-muted" />
+        <span className="truncate font-mono text-[9px]">quorum.app/a/DINNER</span>
+      </div>
+      <div className="flex items-center justify-between">
+        <AvatarStack names={["阿策", "Momo", "周周", "Ken", "小满"]} max={5} />
+        <span className="font-mono text-[8px] text-muted">0 SIGN-UP</span>
+      </div>
+      <div className="border border-line bg-surface p-2">
+        <div className="grid grid-cols-8 gap-0.5">
+          {Array.from({ length: 64 }).map((_, i) => (
+            <span
+              key={i}
+              className={`block aspect-square ${
+                [0, 1, 2, 6, 7, 8, 14, 16, 21, 23, 28, 30, 35, 38, 42, 47, 49, 54, 56, 61, 63, 9, 17, 25, 33, 41, 57, 4, 60].includes(i)
+                  ? "bg-ink"
+                  : "bg-transparent"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-const steps = [
-  {
-    title: "创建活动",
-    desc: "设置活动信息、时间地点选项与自定义收集字段，用模板或从零开始。",
-  },
-  {
-    title: "分享链接",
-    desc: "把专属链接或二维码发给参与者，他们无需注册即可加入。",
-  },
-  {
-    title: "一起决定",
-    desc: "大家投票选时间、选地点、提建议，实时结果一目了然。",
-  },
-];
-
-const flowSteps = [
-  {
-    title: "创建",
-    desc: "动态表单\n图片地图",
-    icon: <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>,
-  },
-  {
-    title: "分享",
-    desc: "专属链接\n免注册加入",
-    icon: <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>,
-  },
-  {
-    title: "投票",
-    desc: "时间地点\n自由提议",
-    icon: <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-  },
-  {
-    title: "实时结果",
-    desc: "毫秒同步\n最优高亮",
-    icon: <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>,
-  },
-  {
-    title: "导出决策",
-    desc: "结果导出\n费用追踪",
-    icon: <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
-  },
-];
-
-const modules = [
-  "动态表单构建器",
-  "时间智能投票",
-  "地点智能投票",
-  "自定义选项投票",
-  "自由提议与投票",
-  "实时结果 SSE",
-  "地图选点（高德）",
-  "图片上传",
-  "费用管理",
-  "登录注册",
-  "我的活动看板",
-  "结果导出",
-  "macOS 启动台与 Dock",
-  "免注册参与",
-  "全平台响应式适配",
-];
+function MiniResults() {
+  return (
+    <div className="w-full space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="flex items-center gap-1.5 font-mono text-[8px] tracking-wide">
+          <span className="live-dot" /> LIVE
+        </span>
+        <span className="font-mono text-[8px] text-muted">9 人</span>
+      </div>
+      {[
+        { label: "周六 17:30", width: "62%", count: 5 },
+        { label: "周六 19:00", width: "25%", count: 2 },
+        { label: "周日 12:00", width: "13%", count: 1 },
+      ].map((row, index) => (
+        <div key={row.label}>
+          <div className="mb-1 flex justify-between text-[9px]">
+            <span>{row.label}</span>
+            <span className="font-mono text-muted">{row.count}</span>
+          </div>
+          <div className="h-2 bg-line/50">
+            <div className={`h-full ${index === 0 ? "bg-coral" : "bg-ink/25"}`} style={{ width: row.width }} />
+          </div>
+        </div>
+      ))}
+      <div className="flex justify-end">
+        <span className="rotate-[-4deg] border border-ink bg-acid px-2 py-0.5 font-mono text-[8px] tracking-wide">
+          SETTLED
+        </span>
+      </div>
+    </div>
+  );
+}

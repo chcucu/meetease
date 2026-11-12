@@ -1,14 +1,16 @@
-import { NextResponse } from "next/server";
-import { AUTH_COOKIE } from "@/lib/auth";
+import { NextRequest } from "next/server";
+import { ok } from "@/lib/api";
+import { destroySession, isSecureRequest, SESSION_COOKIE } from "@/lib/session";
 
-export async function POST() {
-  const res = NextResponse.json({ success: true });
-  res.cookies.set(AUTH_COOKIE, "", {
+export async function POST(request: NextRequest) {
+  await destroySession(request.cookies.get(SESSION_COOKIE)?.value);
+  const response = ok({});
+  response.cookies.set(SESSION_COOKIE, "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 0,
+    secure: isSecureRequest(request),
     path: "/",
+    maxAge: 0,
   });
-  return res;
+  return response;
 }

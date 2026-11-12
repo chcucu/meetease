@@ -1,86 +1,92 @@
-import { prisma } from "@/lib/prisma";
+import { NextRequest } from "next/server";
+import { fail } from "@/lib/api";
+import { getSnapshot } from "@/lib/activities";
+import { subscribe } from "@/lib/realtime";
+
+type Context = { params: Promise<{ code: string }> };
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
-export async function GET(request: Request, { params }: { params: Promise<{ code: string }> }) {
-  const { code } = await params;
-
-  const activity = await prisma.activity.findUnique({ where: { shareCode: code } });
-  if (!activity) {
-    return new Response("Activity not found", { status: 404 });
-  }
+export async function GET(request: NextRequest, context: Context) {
+  const { code: rawCode } = await context.params;
+  const code = rawCode.toUpperCase();
+  const initial = await getSnapshot(code);
+  if (!initial) return fail("没有找到这个活动", 404);
 
   const encoder = new TextEncoder();
-  let lastData = "";
+  let closed = false;
+  let cleanup = () => {};
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      const send = async () => {
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      let lastPayload = "";
+      let sending = false;
+
+      const write = (chunk: string) => {
+        if (closed) return;
         try {
-          const [timeOptions, locationOptions, suggestions, participantCount, participants] = await Promise.all([
-            prisma.timeOption.findMany({
-              where: { activityId: activity.id },
-              include: { _count: { select: { votes: true } } },
-            }),
-            prisma.locationOption.findMany({
-              where: { activityId: activity.id },
-              include: { _count: { select: { votes: true } } },
-            }),
-            prisma.suggestion.findMany({
-              where: { activityId: activity.id },
-              include: { _count: { select: { votes: true } } },
-              orderBy: { createdAt: "desc" },
-            }),
-            prisma.participant.count({ where: { activityId: activity.id } }),
-            prisma.participant.findMany({
-              where: { activityId: activity.id },
-              select: { id: true, name: true, paid: true, paidAt: true },
-            }),
-          ]);
-
-          const paidCount = participants.filter((p) => p.paid).length;
-          const unpaidCount = participants.filter((p) => !p.paid).length;
-
-          const data = JSON.stringify({
-            timeOptions,
-            locationOptions,
-            suggestions,
-            participantCount,
-            feeAmount: activity.feeAmount,
-            feeDescription: activity.feeDescription,
-            paidCount,
-            unpaidCount,
-            totalParticipants: participants.length,
-            participants,
-          });
-
-          if (data !== lastData) {
-            lastData = data;
-            controller.enqueue(encoder.encode(`data: ${data}\n\n`));
-          }
-        } catch (e) {
-          // ignore polling errors
+          controller.enqueue(encoder.encode(chunk));
+        } catch {
+          cleanup();
         }
       };
 
-      // Send initial data
-      await send();
+      const sendSnapshot = (snapshot: unknown) => {
+        const payload = JSON.stringify(snapshot);
+        if (payload === lastPayload) return;
+        lastPayload = payload;
+        write(`event: snapshot\ndata: ${payload}\n\n`);
+      };
 
-      const interval = setInterval(send, 2000);
+      const refresh = async () => {
+        if (sending || closed) return;
+        sending = true;
+        try {
+          const snapshot = await getSnapshot(code);
+          if (snapshot) sendSnapshot(snapshot);
+        } catch {
+          // Keep the stream alive; the next tick can recover.
+        } finally {
+          sending = false;
+        }
+      };
 
-      request.signal.addEventListener("abort", () => {
-        clearInterval(interval);
-        controller.close();
+      const unsubscribe = subscribe(code, () => {
+        void refresh();
       });
+      const poll = setInterval(() => void refresh(), 10000);
+      const heartbeat = setInterval(() => write(": quorum\n\n"), 20000);
+
+      cleanup = () => {
+        if (closed) return;
+        closed = true;
+        clearInterval(poll);
+        clearInterval(heartbeat);
+        unsubscribe();
+        try {
+          controller.close();
+        } catch {
+          // Already closed.
+        }
+      };
+
+      request.signal.addEventListener("abort", cleanup);
+      write(`retry: 3000\n\n`);
+      sendSnapshot(initial);
+
+      if (request.signal.aborted) cleanup();
+    },
+    cancel() {
+      cleanup();
     },
   });
 
   return new Response(stream, {
     headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
     },
   });
 }
