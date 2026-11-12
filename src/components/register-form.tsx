@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
+import { useToast } from "@/components/toast";
 
 export function RegisterForm() {
   const router = useRouter();
   const { setUser } = useAuth();
+  const toast = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,6 +37,7 @@ export function RegisterForm() {
       router.refresh();
     } catch {
       setError("网络出了点问题，请重试");
+      toast({ title: "网络出了点问题", variant: "error" });
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
   ArrowLeft,
@@ -20,13 +20,21 @@ import {
   Wallet,
 } from "lucide-react";
 import { CoverPoster } from "./cover-poster";
+import { LocationPicker } from "./location-picker";
+import { useToast } from "./toast";
 import { CATEGORIES, COVER_THEMES } from "@/lib/types";
 import { toLocalInputValue } from "@/lib/format";
 
 const STORAGE_KEY = "quorum:draft:v1";
 
 type TimeDraft = { id: string; start: string; end: string; note: string };
-type PlaceDraft = { id: string; label: string; note: string };
+type PlaceDraft = {
+  id: string;
+  label: string;
+  note: string;
+  lat: number | null;
+  lng: number | null;
+};
 type FieldDraft = {
   id: string;
   label: string;
@@ -50,6 +58,8 @@ type Draft = {
   fields: FieldDraft[];
   locationName: string;
   locationAddress: string;
+  locationLat: number | null;
+  locationLng: number | null;
   feeAmount: string;
   feeNote: string;
 };
@@ -64,10 +74,12 @@ const EMPTY: Draft = {
   deadline: "",
   allowSuggestions: true,
   times: [{ id: "t1", start: "", end: "", note: "" }],
-  places: [{ id: "p1", label: "", note: "" }],
+  places: [{ id: "p1", label: "", note: "", lat: null, lng: null }],
   fields: [],
   locationName: "",
   locationAddress: "",
+  locationLat: null,
+  locationLng: null,
   feeAmount: "",
   feeNote: "",
 };
@@ -155,6 +167,7 @@ function nextDay(daysFromNow: number, hour: number, minute: number) {
 
 export function CreateWizard({ userName }: { userName: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [step, setStep] = useState(0);
   const [maxVisited, setMaxVisited] = useState(0);
   const [draft, setDraft] = useState<Draft>(EMPTY);
@@ -162,19 +175,31 @@ export function CreateWizard({ userName }: { userName: string }) {
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [locationPickerOpen, setLocationPickerOpen] = useState(false);
+  const [pickerFor, setPickerFor] = useState<string | null>(null);
+  const submittedRef = useRef(false);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as Partial<Draft>;
+        const restoredPlaces = (parsed.places?.length ? parsed.places : EMPTY.places).map(
+          (place) => ({
+            ...place,
+            lat: typeof place.lat === "number" ? place.lat : null,
+            lng: typeof place.lng === "number" ? place.lng : null,
+          })
+        );
         // Restoring a local draft is a client-only external read, not a render-time value.
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setDraft({
           ...EMPTY,
           ...parsed,
+          locationLat: typeof parsed.locationLat === "number" ? parsed.locationLat : null,
+          locationLng: typeof parsed.locationLng === "number" ? parsed.locationLng : null,
           times: parsed.times?.length ? parsed.times : EMPTY.times,
-          places: parsed.places?.length ? parsed.places : EMPTY.places,
+          places: restoredPlaces,
           fields: parsed.fields ?? [],
         });
       }
@@ -185,8 +210,9 @@ export function CreateWizard({ userName }: { userName: string }) {
   }, []);
 
   useEffect(() => {
-    if (!loaded) return;
+    if (!loaded || submittedRef.current) return;
     const timer = setTimeout(() => {
+      if (submittedRef.current) return;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
       setSavedAt(new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }));
     }, 700);
@@ -214,8 +240,8 @@ export function CreateWizard({ userName }: { userName: string }) {
         { id: uid("t"), start: nextDay(3, 12, 0), end: nextDay(3, 15, 0), note: "" },
       ],
       places: [
-        { id: uid("p"), label: template.place, note: "人均 ¥150–200" },
-        { id: uid("p"), label: "备选地点", note: "视人数确认" },
+        { id: uid("p"), label: template.place, note: "人均 ¥150–200", lat: null, lng: null },
+        { id: uid("p"), label: "备选地点", note: "视人数确认", lat: null, lng: null },
       ],
       locationName: template.place,
       fields: [
@@ -310,6 +336,10 @@ export function CreateWizard({ userName }: { userName: string }) {
     setSubmitting(true);
     setError(null);
 
+    const hasLocation =
+      Boolean(draft.locationName.trim() || draft.locationAddress.trim()) ||
+      (draft.locationLat !== null && draft.locationLng !== null);
+
     const payload = {
       title: draft.title.trim(),
       description: draft.description.trim(),
@@ -320,15 +350,14 @@ export function CreateWizard({ userName }: { userName: string }) {
       coverTheme: draft.theme,
       coverImage: draft.coverImage.trim() || null,
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Shanghai",
-      location:
-        draft.locationName.trim() || draft.locationAddress.trim()
-          ? {
-              name: draft.locationName.trim() || null,
-              address: draft.locationAddress.trim() || null,
-              lat: null,
-              lng: null,
-            }
-          : null,
+      location: hasLocation
+        ? {
+            name: draft.locationName.trim() || null,
+            address: draft.locationAddress.trim() || null,
+            lat: draft.locationLat,
+            lng: draft.locationLng,
+          }
+        : null,
       fee:
         draft.feeAmount && !Number.isNaN(Number(draft.feeAmount))
           ? { amount: Number(draft.feeAmount), note: draft.feeNote.trim() || null }
@@ -346,15 +375,19 @@ export function CreateWizard({ userName }: { userName: string }) {
             lng: null,
           })),
         ...draft.places
-          .filter((place) => place.label.trim())
+          .filter(
+            (place) =>
+              Boolean(place.label.trim()) ||
+              (place.lat !== null && place.lng !== null)
+          )
           .map((place) => ({
             kind: "place" as const,
-            label: place.label.trim(),
+            label: place.label.trim() || "地图选点",
             note: place.note.trim() || null,
             startsAt: null,
             endsAt: null,
-            lat: null,
-            lng: null,
+            lat: place.lat,
+            lng: place.lng,
           })),
       ],
       fields: draft.fields.map((field) => ({
@@ -381,12 +414,15 @@ export function CreateWizard({ userName }: { userName: string }) {
       const data = await response.json();
       if (!response.ok) {
         setError(data.error ?? "发布失败，请检查输入");
+        toast({ title: "发布失败", description: data.error, variant: "error" });
         return;
       }
       localStorage.removeItem(STORAGE_KEY);
+      submittedRef.current = true;
       router.push(`/app/${data.code}?created=1`);
     } catch {
       setError("网络出了点问题，请重试");
+      toast({ title: "网络出了点问题", variant: "error" });
     } finally {
       setSubmitting(false);
     }
@@ -394,6 +430,13 @@ export function CreateWizard({ userName }: { userName: string }) {
 
   const validTimes = useMemo(() => draft.times.filter((time) => time.start), [draft.times]);
   const validPlaces = useMemo(() => draft.places.filter((place) => place.label.trim()), [draft.places]);
+  const locationPoint = useMemo(
+    () =>
+      draft.locationLat !== null && draft.locationLng !== null
+        ? { lat: draft.locationLat, lng: draft.locationLng }
+        : null,
+    [draft.locationLat, draft.locationLng]
+  );
   const previewDeadline = draft.deadline ? new Date(draft.deadline).toISOString() : null;
   const previewFee = draft.feeAmount && !Number.isNaN(Number(draft.feeAmount)) ? Number(draft.feeAmount) : null;
 
@@ -800,7 +843,10 @@ export function CreateWizard({ userName }: { userName: string }) {
                       <button
                         type="button"
                         onClick={() =>
-                          update("places", [...draft.places, { id: uid("p"), label: "", note: "" }])
+                          update("places", [
+                            ...draft.places,
+                            { id: uid("p"), label: "", note: "", lat: null, lng: null },
+                          ])
                         }
                         className="btn btn-ghost btn-sm"
                       >
@@ -812,23 +858,46 @@ export function CreateWizard({ userName }: { userName: string }) {
                     <div className="space-y-2.5">
                       {draft.places.map((place, index) => (
                         <div key={place.id} className="border border-line bg-paper p-3">
-                          <div className="mb-2 flex items-center justify-between">
+                          <div className="mb-2 flex items-center justify-between gap-2">
                             <span className="text-[11px] text-muted">地点 {index + 1}</span>
-                            {draft.places.length > 1 && (
+                            <div className="flex items-center gap-3">
                               <button
                                 type="button"
                                 onClick={() =>
-                                  update(
-                                    "places",
-                                    draft.places.filter((item) => item.id !== place.id)
+                                  setPickerFor((current) =>
+                                    current === place.id ? null : place.id
                                   )
                                 }
-                                className="text-muted transition-colors hover:text-coral"
-                                aria-label="删除地点选项"
+                                className={`flex items-center gap-1 text-[10px] transition-colors ${
+                                  place.lat !== null && place.lng !== null
+                                    ? "text-ink"
+                                    : "text-muted hover:text-ink"
+                                }`}
                               >
-                                <Trash2 size={13} />
+                                <MapPin size={11} />
+                                {pickerFor === place.id
+                                  ? "收起地图"
+                                  : place.lat !== null && place.lng !== null
+                                    ? "已定位"
+                                    : "地图选点"}
                               </button>
-                            )}
+                              {draft.places.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (pickerFor === place.id) setPickerFor(null);
+                                    update(
+                                      "places",
+                                      draft.places.filter((item) => item.id !== place.id)
+                                    );
+                                  }}
+                                  className="text-muted transition-colors hover:text-coral"
+                                  aria-label="删除地点选项"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              )}
+                            </div>
                           </div>
                           <div className="grid gap-2 sm:grid-cols-[1fr_1fr]">
                             <input
@@ -864,6 +933,42 @@ export function CreateWizard({ userName }: { userName: string }) {
                               maxLength={120}
                             />
                           </div>
+                          {pickerFor === place.id && (
+                            <div className="mt-2">
+                              <LocationPicker
+                                value={
+                                  place.lat !== null && place.lng !== null
+                                    ? { lat: place.lat, lng: place.lng }
+                                    : null
+                                }
+                                onChange={(next) =>
+                                  update(
+                                    "places",
+                                    draft.places.map((item) =>
+                                      item.id === place.id
+                                        ? {
+                                            ...item,
+                                            lat: next ? next.lat : null,
+                                            lng: next ? next.lng : null,
+                                          }
+                                        : item
+                                    )
+                                  )
+                                }
+                                onAddress={(address) =>
+                                  setDraft((current) => ({
+                                    ...current,
+                                    places: current.places.map((item) =>
+                                      item.id === place.id && !item.label.trim()
+                                        ? { ...item, label: address.slice(0, 80) }
+                                        : item
+                                    ),
+                                  }))
+                                }
+                                height={220}
+                              />
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -892,6 +997,44 @@ export function CreateWizard({ userName }: { userName: string }) {
                         maxLength={160}
                       />
                     </div>
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setLocationPickerOpen((open) => !open)}
+                        className="btn btn-ghost btn-sm"
+                      >
+                        <MapPin size={12} />
+                        {locationPickerOpen ? "收起地图" : "在地图上选点"}
+                      </button>
+                      {locationPoint && (
+                        <span className="font-mono text-[10px] tracking-[0.06em] text-muted">
+                          已选 {locationPoint.lat.toFixed(4)}, {locationPoint.lng.toFixed(4)}
+                        </span>
+                      )}
+                    </div>
+                    {locationPickerOpen && (
+                      <div className="mt-3">
+                        <LocationPicker
+                          value={locationPoint}
+                          onChange={(next) => {
+                            setDraft((current) => ({
+                              ...current,
+                              locationLat: next ? next.lat : null,
+                              locationLng: next ? next.lng : null,
+                            }));
+                            setError(null);
+                          }}
+                          onAddress={(address) => {
+                            setDraft((current) =>
+                              current.locationAddress.trim()
+                                ? current
+                                : { ...current, locationAddress: address }
+                            );
+                            setError(null);
+                          }}
+                        />
+                      </div>
+                    )}
                   </section>
                 </div>
               )}

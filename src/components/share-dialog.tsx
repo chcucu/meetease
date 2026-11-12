@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Check, Copy, Share2, X } from "lucide-react";
+import { useToast } from "@/components/toast";
 
 const QRCodeSVG = dynamic(() => import("qrcode.react").then((mod) => mod.QRCodeSVG), {
   ssr: false,
@@ -22,6 +23,7 @@ export function ShareButton({
   className?: string;
   compact?: boolean;
 }) {
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -40,16 +42,30 @@ export function ShareButton({
   }, [open]);
 
   async function copy() {
+    let copiedToClipboard = false;
     try {
       await navigator.clipboard.writeText(url);
+      copiedToClipboard = true;
     } catch {
       const input = document.createElement("textarea");
       input.value = url;
       document.body.appendChild(input);
       input.select();
-      document.execCommand("copy");
-      input.remove();
+      try {
+        copiedToClipboard = document.execCommand("copy");
+      } catch {
+        copiedToClipboard = false;
+      } finally {
+        input.remove();
+      }
     }
+
+    if (!copiedToClipboard) {
+      toast({ title: "复制失败，请手动选择链接", variant: "error" });
+      return;
+    }
+
+    toast({ title: "链接已复制", variant: "success" });
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   }

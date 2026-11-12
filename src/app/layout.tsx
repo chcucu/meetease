@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { AuthProvider } from "@/components/auth-provider";
+import { ToastProvider } from "@/components/toast";
 import "./globals.css";
 
 const geist = Geist({
@@ -60,8 +61,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="zh-CN">
       <body className={`${geist.variable} ${instrument.variable} ${jetbrains.variable}`}>
         <AuthProvider>
-          {children}
-          <div className="grain-overlay" aria-hidden="true" />
+          <ToastProvider>
+            {children}
+            <div className="grain-overlay" aria-hidden="true" />
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

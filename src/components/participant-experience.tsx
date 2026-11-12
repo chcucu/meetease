@@ -22,6 +22,7 @@ import { ShareButton } from "./share-dialog";
 import { CalendarLinks } from "./calendar-links";
 import { DeadlineCountdown } from "./deadline-countdown";
 import { SuccessOverlay } from "./success-overlay";
+import { useToast } from "./toast";
 import { Turnstile } from "./turnstile";
 import { Avatar, AvatarStack, StatusPill } from "./ui";
 import { deadlineState, formatDateTime, isPast, relativeTime, timeZoneLabel } from "@/lib/format";
@@ -55,6 +56,7 @@ export function ParticipantExperience({
   initialActivity: ActivityDetail;
   isOwner: boolean;
 }) {
+  const toast = useToast();
   const [activity, setActivity] = useState(initialActivity);
   const [clientKey] = useState<string | null>(() =>
     typeof window === "undefined" ? null : getClientKey(initialActivity.shareCode)
@@ -199,6 +201,7 @@ export function ParticipantExperience({
       const data = await response.json();
       if (!response.ok) {
         setError(data.error ?? "提交失败，请重试");
+        toast({ title: "提交失败", description: data.error, variant: "error" });
         if (response.status === 403) {
           setTurnstileToken("");
           setTurnstileReset((value) => value + 1);
@@ -224,6 +227,7 @@ export function ParticipantExperience({
       setTurnstileReset((value) => value + 1);
     } catch {
       setError("网络出了点问题，请重试");
+      toast({ title: "网络出了点问题", variant: "error" });
     } finally {
       setSubmitting(false);
     }
@@ -252,6 +256,7 @@ export function ParticipantExperience({
       setSuggestionReset((value) => value + 1);
       if (!response.ok) {
         setNotice(data.error ?? "提交失败");
+        toast({ title: "提议提交失败", description: data.error, variant: "error" });
         return;
       }
       setActivity((current) => ({
@@ -302,6 +307,7 @@ export function ParticipantExperience({
       if (!response.ok) {
         setActivity((current) => ({ ...current, suggestions: before }));
         setNotice(data.error ?? "操作失败");
+        toast({ title: "操作失败", description: data.error, variant: "error" });
         return;
       }
       setActivity((current) => ({
@@ -750,7 +756,7 @@ export function ParticipantExperience({
               </div>
             </dl>
 
-            {activity.location && (activity.location.lat && activity.location.lng ? (
+            {activity.location && (activity.location.lat != null && activity.location.lng != null ? (
               <a
                 href={`https://www.openstreetmap.org/?mlat=${activity.location.lat}&mlon=${activity.location.lng}#map=15/${activity.location.lat}/${activity.location.lng}`}
                 target="_blank"

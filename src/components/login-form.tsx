@@ -5,11 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
+import { useToast } from "@/components/toast";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setUser } = useAuth();
+  const toast = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +19,8 @@ export function LoginForm() {
   const [demoLoading, setDemoLoading] = useState(false);
 
   const nextParam = searchParams.get("next");
-  const next = nextParam && nextParam.startsWith("/") ? nextParam : "/app";
+  const next =
+    nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/app";
 
   async function login(emailValue: string, passwordValue: string) {
     setError(null);
@@ -38,6 +41,7 @@ export function LoginForm() {
       router.refresh();
     } catch {
       setError("网络出了点问题，请重试");
+      toast({ title: "网络出了点问题", variant: "error" });
     } finally {
       setLoading(false);
       setDemoLoading(false);
