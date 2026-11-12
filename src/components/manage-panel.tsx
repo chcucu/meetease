@@ -14,6 +14,7 @@ import {
   Loader2,
   Lock,
   MessageSquare,
+  Plus,
   Radio,
   Trash2,
   Unlock,
@@ -23,9 +24,17 @@ import {
 } from "lucide-react";
 import { ShareButton } from "./share-dialog";
 import { TallyBoard } from "./tally-board";
+import { DeadlineCountdown } from "./deadline-countdown";
 import { Avatar, StatusPill } from "./ui";
 import { coverPalette } from "@/lib/cover";
-import { formatDateTime, relativeTime, toLocalInputValue } from "@/lib/format";
+import {
+  formatDateTime,
+  formatOptionTime,
+  relativeTime,
+  timeZoneLabel,
+  toZonedInputValue,
+  zonedInputToISO,
+} from "@/lib/format";
 import { categoryLabel, type ActivityDetail, type PublicParticipant } from "@/lib/types";
 
 type Tab = "overview" | "people" | "suggestions" | "settings";
@@ -53,10 +62,17 @@ export function ManagePanel({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [paidBusy, setPaidBusy] = useState<string | null>(null);
-  const [deadlineInput, setDeadlineInput] = useState(toLocalInputValue(initialActivity.deadline));
+  const [deadlineInput, setDeadlineInput] = useState(
+    toZonedInputValue(initialActivity.deadline, initialActivity.timeZone)
+  );
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showCreated, setShowCreated] = useState(created);
   const [live, setLive] = useState(false);
+  const [newOptionKind, setNewOptionKind] = useState<"time" | "place">("time");
+  const [newOptionLabel, setNewOptionLabel] = useState("");
+  const [newOptionNote, setNewOptionNote] = useState("");
+  const [newOptionStart, setNewOptionStart] = useState("");
+  const [newOptionEnd, setNewOptionEnd] = useState("");
   const [shareUrl] = useState(() =>
     typeof window === "undefined" ? `/a/${code}` : `${window.location.origin}/a/${code}`
   );
@@ -170,16 +186,12 @@ export function ManagePanel({
       await patchActivity({ deadline: null }, "deadline", "已清除截止时间。");
       return;
     }
-    const date = new Date(deadlineInput);
-    if (Number.isNaN(date.getTime())) {
+    const iso = zonedInputToISO(deadlineInput, activity.timeZone);
+    if (!iso) {
       setError("截止时间格式不正确");
       return;
     }
-    await patchActivity(
-      { deadline: date.toISOString() },
-      "deadline",
-      "截止时间已更新。"
-    );
+    await patchActivity({ deadline: iso }, "deadline", "截止时间已更新。");
   }
 
   async function togglePaid(participant: PublicParticipant) {
@@ -216,6 +228,86 @@ export function ManagePanel({
       setError("网络出了点问题，请重试");
     } finally {
       setPaidBusy(null);
+    }
+  }
+
+  async function duplicateActivity() {
+    setBusy("duplicate");
+    setError(null);
+    try {
+      const response = await fetch(`/api/activities/${code}/duplicate`, { method: "POST" });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error ?? "复制失败");
+        return;
+      }
+      router.push(`/app/${data.code}`);
+      router.refresh();
+    } catch {
+      setError("网络出了点问题，请重试");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function addOption() {
+    setBusy("add-option");
+    setError(null);
+
+    const startsAt =
+      newOptionKind === "time"
+        ? zonedInputToISO(newOptionStart, activity.timeZone)
+        : null;
+    const endsAt =
+      newOptionKind === "time" && newOptionEnd
+        ? zonedInputToISO(newOptionEnd, activity.timeZone)
+        : null;
+
+    if (newOptionKind === "time" && !startsAt) {
+      setError("请选择开始时间");
+      setBusy(null);
+      return;
+    }
+    if (newOptionKind === "place" && !newOptionLabel.trim()) {
+      setError("请填写地点名称");
+      setBusy(null);
+      return;
+    }
+
+    const label =
+      newOptionKind === "time"
+        ? formatOptionTime(startsAt, endsAt, activity.timeZone)
+        : newOptionLabel.trim();
+
+    try {
+      const response = await fetch(`/api/activities/${code}/options`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: newOptionKind,
+          label,
+          note: newOptionNote.trim() || null,
+          startsAt,
+          endsAt,
+          lat: null,
+          lng: null,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error ?? "添加失败");
+        return;
+      }
+      setNewOptionLabel("");
+      setNewOptionNote("");
+      setNewOptionStart("");
+      setNewOptionEnd("");
+      await refresh();
+      setNotice("新选项已添加，参与者可立即看到。");
+    } catch {
+      setError("网络出了点问题，请重试");
+    } finally {
+      setBusy(null);
     }
   }
 
@@ -290,11 +382,22 @@ export function ManagePanel({
                   {activity.title}
                 </h1>
                 <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted">
-                  <span>创建于 {formatDateTime(activity.createdAt)}</span>
+                  <span>创建于 {formatDateTime(activity.createdAt, activity.timeZone)}</span>
                   <span>·</span>
                   <span>更新于 {relativeTime(activity.updatedAt)}</span>
                   <span>·</span>
                   <span>{participants.length} 人参与</span>
+                  <span>·</span>
+                  <span>{timeZoneLabel(activity.timeZone)}</span>
+                  {activity.deadline && (
+                    <>
+                      <span>·</span>
+                      <DeadlineCountdown
+                        deadline={activity.deadline}
+                        status={activity.status}
+                      />
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -643,6 +746,9 @@ export function ManagePanel({
                   <div className="pt-3">
                     <label htmlFor="deadline" className="field-label">
                       截止时间
+                      <span className="ml-1.5 font-normal text-muted">
+                        {timeZoneLabel(activity.timeZone)}
+                      </span>
                     </label>
                     <div className="flex flex-col gap-2 sm:flex-row">
                       <input
@@ -713,11 +819,119 @@ export function ManagePanel({
                       实时结果
                       <ArrowUpRight size={12} />
                     </Link>
+                    <button
+                      type="button"
+                      onClick={() => void duplicateActivity()}
+                      disabled={busy === "duplicate"}
+                      className="btn btn-ghost btn-sm"
+                    >
+                      {busy === "duplicate" ? (
+                        <Loader2 size={12} className="animate-spin" />
+                      ) : (
+                        <Copy size={12} />
+                      )}
+                      复制为新的决策
+                    </button>
                   </div>
 
                   <p className="mt-3 border-t border-line pt-3 text-[10px] leading-5 text-muted">
-                    CSV 包含姓名、支付状态、时间与地点选择、自定义回答和附议内容。仅组织者可下载。
+                    CSV 包含姓名、支付状态、时间与地点选择、自定义回答和附议内容。仅组织者可下载。复制会保留选项与问题，不包含参与者和投票。
                   </p>
+                </SettingsCard>
+
+                <SettingsCard title="追加选项" hint="发布后补充时间或地点">
+                  <div className="flex border border-line-strong bg-paper p-0.5">
+                    {(["time", "place"] as const).map((kind) => (
+                      <button
+                        key={kind}
+                        type="button"
+                        onClick={() => setNewOptionKind(kind)}
+                        className={`flex-1 px-3 py-1.5 text-[11px] transition-colors ${
+                          newOptionKind === kind
+                            ? "bg-ink text-paper"
+                            : "text-muted hover:text-ink"
+                        }`}
+                      >
+                        {kind === "time" ? "时间" : "地点"}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mt-3 space-y-2.5">
+                    {newOptionKind === "time" ? (
+                      <>
+                        <div>
+                          <label className="field-label" htmlFor="option-start">
+                            开始
+                          </label>
+                          <input
+                            id="option-start"
+                            type="datetime-local"
+                            value={newOptionStart}
+                            onChange={(event) => setNewOptionStart(event.target.value)}
+                            className="field text-[12px]"
+                          />
+                        </div>
+                        <div>
+                          <label className="field-label" htmlFor="option-end">
+                            结束
+                          </label>
+                          <input
+                            id="option-end"
+                            type="datetime-local"
+                            value={newOptionEnd}
+                            onChange={(event) => setNewOptionEnd(event.target.value)}
+                            className="field text-[12px]"
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <div>
+                        <label className="field-label" htmlFor="option-label">
+                          地点名称
+                        </label>
+                        <input
+                          id="option-label"
+                          value={newOptionLabel}
+                          onChange={(event) => setNewOptionLabel(event.target.value)}
+                          maxLength={80}
+                          className="field text-[12px]"
+                          placeholder="例如：梧桐小院"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="field-label" htmlFor="option-note">
+                        备注
+                      </label>
+                      <input
+                        id="option-note"
+                        value={newOptionNote}
+                        onChange={(event) => setNewOptionNote(event.target.value)}
+                        maxLength={120}
+                        className="field text-[12px]"
+                        placeholder="可选"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => void addOption()}
+                      disabled={busy === "add-option"}
+                      className="btn btn-dark btn-sm w-full"
+                    >
+                      {busy === "add-option" ? (
+                        <Loader2 size={12} className="animate-spin" />
+                      ) : (
+                        <Plus size={12} />
+                      )}
+                      添加选项
+                    </button>
+                    <p className="text-[10px] leading-5 text-muted">
+                      时间按 {timeZoneLabel(activity.timeZone)} 填写。新增选项会立即出现在公开页，并保留已有投票。
+                    </p>
+                  </div>
                 </SettingsCard>
 
                 <div className="border border-coral bg-coral-soft p-5 lg:col-span-2">

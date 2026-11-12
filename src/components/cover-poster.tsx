@@ -57,6 +57,7 @@ export function CoverPoster({
   theme,
   coverImage,
   deadline,
+  timeZone,
   organizer,
   fee,
   shareCode,
@@ -69,6 +70,7 @@ export function CoverPoster({
   theme: string;
   coverImage?: string | null;
   deadline?: string | null;
+  timeZone?: string;
   organizer?: string;
   fee?: number | null;
   shareCode?: string;
@@ -153,7 +155,7 @@ export function CoverPoster({
                 className={`font-mono uppercase ${hero ? "text-[11px]" : "text-[10px]"}`}
                 style={{ letterSpacing: "0.1em", color: muted }}
               >
-                {formatDateTime(deadline)} 截止
+                {formatDateTime(deadline, timeZone)} 截止
               </p>
             )}
             {(organizer || fee) && (

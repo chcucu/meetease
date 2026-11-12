@@ -1,58 +1,164 @@
-const TZ = "Asia/Shanghai";
+export const DEFAULT_TIME_ZONE = "Asia/Shanghai";
 
-const dateTimeFormatter = new Intl.DateTimeFormat("zh-CN", {
-  timeZone: TZ,
-  month: "numeric",
-  day: "numeric",
-  weekday: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false,
-});
+const formatterCache = new Map<string, Intl.DateTimeFormat>();
 
-const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
-  timeZone: TZ,
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
-
-const timeFormatter = new Intl.DateTimeFormat("zh-CN", {
-  timeZone: TZ,
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false,
-});
-
-export function formatDateTime(value: string | Date | null | undefined) {
-  if (!value) return "";
-  const date = typeof value === "string" ? new Date(value) : value;
-  if (Number.isNaN(date.getTime())) return "";
-  return dateTimeFormatter.format(date);
+function getFormatter(timeZone: string, options: Intl.DateTimeFormatOptions) {
+  const key = `${timeZone}:${JSON.stringify(options)}`;
+  let formatter = formatterCache.get(key);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat("zh-CN", { timeZone, ...options });
+    formatterCache.set(key, formatter);
+  }
+  return formatter;
 }
 
-export function formatDate(value: string | Date | null | undefined) {
-  if (!value) return "";
+function toDate(value: string | Date | null | undefined) {
+  if (!value) return null;
   const date = typeof value === "string" ? new Date(value) : value;
-  if (Number.isNaN(date.getTime())) return "";
-  return dateFormatter.format(date);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
-export function formatTime(value: string | Date | null | undefined) {
-  if (!value) return "";
-  const date = typeof value === "string" ? new Date(value) : value;
-  if (Number.isNaN(date.getTime())) return "";
-  return timeFormatter.format(date);
+export function formatDateTime(
+  value: string | Date | null | undefined,
+  timeZone: string = DEFAULT_TIME_ZONE
+) {
+  const date = toDate(value);
+  if (!date) return "";
+  return getFormatter(timeZone, {
+    month: "numeric",
+    day: "numeric",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
 }
 
-export function formatOptionTime(startsAt: string | null, endsAt: string | null) {
+export function formatDate(
+  value: string | Date | null | undefined,
+  timeZone: string = DEFAULT_TIME_ZONE
+) {
+  const date = toDate(value);
+  if (!date) return "";
+  return getFormatter(timeZone, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(date);
+}
+
+export function formatTime(
+  value: string | Date | null | undefined,
+  timeZone: string = DEFAULT_TIME_ZONE
+) {
+  const date = toDate(value);
+  if (!date) return "";
+  return getFormatter(timeZone, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function datePart(value: Date, timeZone: string) {
+  return getFormatter(timeZone, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(value);
+}
+
+export function formatOptionTime(
+  startsAt: string | null,
+  endsAt: string | null,
+  timeZone: string = DEFAULT_TIME_ZONE
+) {
   if (!startsAt) return "";
+  if (!endsAt) return formatDateTime(startsAt, timeZone);
   const start = new Date(startsAt);
-  const sameDay = endsAt ? new Date(endsAt).toDateString() === start.toDateString() : true;
-  if (!endsAt) return formatDateTime(startsAt);
+  const end = new Date(endsAt);
+  const sameDay = datePart(start, timeZone) === datePart(end, timeZone);
   return sameDay
-    ? `${formatDateTime(startsAt)} – ${formatTime(endsAt)}`
-    : `${formatDateTime(startsAt)} – ${formatDateTime(endsAt)}`;
+    ? `${formatDateTime(startsAt, timeZone)} – ${formatTime(endsAt, timeZone)}`
+    : `${formatDateTime(startsAt, timeZone)} – ${formatDateTime(endsAt, timeZone)}`;
+}
+
+export function timeZoneLabel(timeZone: string = DEFAULT_TIME_ZONE) {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      timeZoneName: "shortOffset",
+    }).formatToParts(new Date());
+    return parts.find((part) => part.type === "timeZoneName")?.value ?? timeZone;
+  } catch {
+    return timeZone;
+  }
+}
+
+export function isValidTimeZone(timeZone: string) {
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone }).format(new Date());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function zoneOffsetMs(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(date);
+  const read = (type: string) => Number(parts.find((part) => part.type === type)?.value ?? 0);
+  const asUtc = Date.UTC(
+    read("year"),
+    read("month") - 1,
+    read("day"),
+    read("hour") % 24,
+    read("minute"),
+    read("second")
+  );
+  return asUtc - date.getTime();
+}
+
+/** Formats a UTC instant as the `datetime-local` value of a specific zone. */
+export function toZonedInputValue(
+  value: string | Date | null | undefined,
+  timeZone: string = DEFAULT_TIME_ZONE
+) {
+  const date = toDate(value);
+  if (!date) return "";
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(date);
+  const read = (type: string) => parts.find((part) => part.type === type)?.value ?? "00";
+  return `${read("year")}-${read("month")}-${read("day")}T${read("hour")}:${read("minute")}`;
+}
+
+/** Converts a `datetime-local` value expressed in a specific zone to a UTC ISO string. */
+export function zonedInputToISO(value: string, timeZone: string = DEFAULT_TIME_ZONE) {
+  if (!value) return null;
+  const [datePartValue, timePartValue = "00:00"] = value.split("T");
+  const [year, month, day] = datePartValue.split("-").map(Number);
+  const [hour, minute] = timePartValue.split(":").map(Number);
+  if ([year, month, day, hour, minute].some((part) => Number.isNaN(part))) return null;
+
+  const utcGuess = Date.UTC(year, month - 1, day, hour, minute);
+  let timestamp = utcGuess - zoneOffsetMs(new Date(utcGuess), timeZone);
+  timestamp = utcGuess - zoneOffsetMs(new Date(timestamp), timeZone);
+  return new Date(timestamp).toISOString();
 }
 
 export function relativeTime(value: string | Date) {

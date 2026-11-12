@@ -17,8 +17,10 @@ import {
 } from "lucide-react";
 import { ShareButton } from "./share-dialog";
 import { TallyBoard } from "./tally-board";
+import { CalendarLinks } from "./calendar-links";
+import { DeadlineCountdown } from "./deadline-countdown";
 import { AvatarStack, StatusPill } from "./ui";
-import { deadlineState, formatDateTime, isPast, relativeTime } from "@/lib/format";
+import { deadlineState, formatDateTime, isPast, relativeTime, timeZoneLabel } from "@/lib/format";
 import type { ActivityDetail, ActivitySnapshot } from "@/lib/types";
 
 type Connection = "connecting" | "live" | "offline";
@@ -166,9 +168,12 @@ export function LiveResults({
                 </span>
                 {snapshot.activity.deadline && (
                   <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 text-[10px] text-paper/70">
-                    {formatDateTime(snapshot.activity.deadline)} 截止
+                    {formatDateTime(snapshot.activity.deadline, snapshot.activity.timeZone)} 截止
                   </span>
                 )}
+                <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 text-[10px] text-paper/70">
+                  {timeZoneLabel(snapshot.activity.timeZone)}
+                </span>
               </div>
 
               <h1 className="font-display text-[clamp(2.3rem,5.6vw,4.8rem)] leading-[0.96] tracking-[-0.035em]">
@@ -181,6 +186,15 @@ export function LiveResults({
                 <span>发起人 {initialActivity.organizer.name}</span>
                 <span>·</span>
                 <span>{state.label}</span>
+                {snapshot.activity.deadline && (
+                  <>
+                    <span>·</span>
+                    <DeadlineCountdown
+                      deadline={snapshot.activity.deadline}
+                      status={snapshot.activity.status}
+                    />
+                  </>
+                )}
                 <span>·</span>
                 <span>更新于 {relativeTime(snapshot.updatedAt)}</span>
               </p>
@@ -354,6 +368,23 @@ export function LiveResults({
               <ArrowUpRight size={12} />
             </Link>
           </div>
+
+          {snapshot.options.some((option) => option.kind === "time" && option.startsAt) && (
+            <div className="border border-line bg-surface p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-[12px] font-medium">日程</p>
+                <span className="text-[11px] text-muted">{timeZoneLabel(snapshot.activity.timeZone)}</span>
+              </div>
+              <CalendarLinks
+                code={code}
+                title={snapshot.activity.title}
+                description={initialActivity.description}
+                location={initialActivity.location?.address || initialActivity.location?.name}
+                options={snapshot.options}
+                compact
+              />
+            </div>
+          )}
 
           <div className="border border-line bg-surface p-4">
             <div className="mb-3 flex items-center justify-between">

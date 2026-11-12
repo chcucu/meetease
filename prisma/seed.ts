@@ -7,9 +7,14 @@ const DAY = 24 * 60 * 60 * 1000;
 const now = Date.now();
 
 function at(daysFromNow: number, hour: number, minute = 0) {
-  const d = new Date(now + daysFromNow * DAY);
-  d.setHours(hour, minute, 0, 0);
-  return d;
+  const day = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(now + daysFromNow * DAY));
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return new Date(`${day}T${pad(hour)}:${pad(minute)}:00+08:00`);
 }
 
 function code(seed: string) {
@@ -59,7 +64,7 @@ async function main() {
       allowSuggestions: true,
       status: "open",
       coverTheme: "coral",
-      deadline: at(2, 21, 0),
+      deadline: at(3, 20, 0),
       locationName: "梧桐小院",
       locationAddress: "杭州市西湖区满觉陇路 12 号",
       locationLat: 30.2287,
@@ -68,8 +73,8 @@ async function main() {
       feeNote: "含餐位与酒水，多退少补",
       options: {
         create: [
-          { kind: "time", label: "周六 17:30", note: "预计 3 小时", startsAt: at(3, 17, 30), endsAt: at(3, 21, 0), sortOrder: 0 },
-          { kind: "time", label: "周六 19:00", note: "预计 3 小时", startsAt: at(3, 19, 0), endsAt: at(3, 22, 0), sortOrder: 1 },
+          { kind: "time", label: "周六 17:30", note: "预计 3 小时", startsAt: at(2, 17, 30), endsAt: at(2, 21, 0), sortOrder: 0 },
+          { kind: "time", label: "周六 19:00", note: "预计 3 小时", startsAt: at(2, 19, 0), endsAt: at(2, 22, 0), sortOrder: 1 },
           { kind: "time", label: "周日 12:00", note: "预计 3 小时", startsAt: at(4, 12, 0), endsAt: at(4, 15, 0), sortOrder: 2 },
           { kind: "place", label: "梧桐小院", note: "有院子 · 人均 168", lat: 30.2287, lng: 120.1178, sortOrder: 0 },
           { kind: "place", label: "江边炭火", note: "露台 · 人均 140", lat: 30.2171, lng: 120.1521, sortOrder: 1 },
@@ -182,7 +187,7 @@ async function main() {
       allowSuggestions: true,
       status: "open",
       coverTheme: "lime",
-      deadline: at(5, 20, 0),
+      deadline: at(2, 20, 0),
       locationName: "单向空间 · 花家地店",
       locationAddress: "北京市朝阳区望京中环南路 1 号",
       locationLat: 39.9812,
@@ -190,8 +195,8 @@ async function main() {
       feeAmount: null,
       options: {
         create: [
-          { kind: "time", label: "周五 19:30", startsAt: at(5, 19, 30), endsAt: at(5, 21, 30), sortOrder: 0 },
-          { kind: "time", label: "周六 14:00", startsAt: at(6, 14, 0), endsAt: at(6, 16, 0), sortOrder: 1 },
+          { kind: "time", label: "周五 19:30", startsAt: at(1, 19, 30), endsAt: at(1, 21, 30), sortOrder: 0 },
+          { kind: "time", label: "周六 14:00", startsAt: at(2, 14, 0), endsAt: at(2, 16, 0), sortOrder: 1 },
           { kind: "place", label: "单向空间 · 花家地店", note: "长桌，可围坐", lat: 39.9812, lng: 116.4729, sortOrder: 0 },
           { kind: "place", label: "某人的客厅", note: "需自备座椅", lat: 39.9938, lng: 116.4681, sortOrder: 1 },
         ],

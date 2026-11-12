@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./db";
 import { generateShareCode } from "./codes";
+import { formatOptionTime } from "./format";
 import type {
   ActivityCounts,
   ActivityDetail,
@@ -64,14 +65,19 @@ function parseJson<T>(value: string | null | undefined, fallback: T): T {
   }
 }
 
-function mapOption(option: DetailRecord["options"][number]): PublicOption {
+function mapOption(option: DetailRecord["options"][number], timeZone: string): PublicOption {
+  const startsAt = option.startsAt ? option.startsAt.toISOString() : null;
+  const endsAt = option.endsAt ? option.endsAt.toISOString() : null;
   return {
     id: option.id,
     kind: option.kind === "place" ? "place" : "time",
-    label: option.label,
+    label:
+      option.kind === "time" && startsAt
+        ? formatOptionTime(startsAt, endsAt, timeZone)
+        : option.label,
     note: option.note,
-    startsAt: option.startsAt ? option.startsAt.toISOString() : null,
-    endsAt: option.endsAt ? option.endsAt.toISOString() : null,
+    startsAt,
+    endsAt,
     lat: option.lat,
     lng: option.lng,
     votes: option.votes.length,
@@ -138,6 +144,7 @@ function mapSummary(activity: DetailRecord): ActivitySummary {
     allowSuggestions: activity.allowSuggestions,
     coverTheme: activity.coverTheme,
     coverImage: activity.coverImage,
+    timeZone: activity.timeZone,
     deadline: activity.deadline ? activity.deadline.toISOString() : null,
     createdAt: activity.createdAt.toISOString(),
     updatedAt: activity.updatedAt.toISOString(),
@@ -186,7 +193,7 @@ function mapDetail(
       activity.feeAmount !== null && activity.feeAmount !== undefined
         ? { amount: activity.feeAmount, note: activity.feeNote }
         : null,
-    options: activity.options.map(mapOption),
+    options: activity.options.map((option) => mapOption(option, activity.timeZone)),
     fields,
     suggestions: activity.suggestions.map((s) => mapSuggestion(s, upvotedIds)),
     participants: activity.participants.map((participant) =>
@@ -232,7 +239,9 @@ export async function getActivityForOwner(code: string, ownerId: string) {
 }
 
 function mapSnapshot(activity: SnapshotRecord): ActivitySnapshot {
-  const options = activity.options.map((option) => mapOption(option as DetailRecord["options"][number]));
+  const options = activity.options.map((option) =>
+    mapOption(option as DetailRecord["options"][number], activity.timeZone)
+  );
   const participants = activity.participants.map((p) =>
     mapParticipant(p as DetailRecord["participants"][number], false)
   );
@@ -244,6 +253,7 @@ function mapSnapshot(activity: SnapshotRecord): ActivitySnapshot {
       status: activity.status === "closed" ? "closed" : "open",
       voteType: activity.voteType === "multiple" ? "multiple" : "single",
       deadline: activity.deadline ? activity.deadline.toISOString() : null,
+      timeZone: activity.timeZone,
       feeAmount: activity.feeAmount,
       feeNote: activity.feeNote,
       allowSuggestions: activity.allowSuggestions,
@@ -289,6 +299,7 @@ export async function getOwnerActivities(ownerId: string): Promise<ActivitySumma
     allowSuggestions: activity.allowSuggestions,
     coverTheme: activity.coverTheme,
     coverImage: activity.coverImage,
+    timeZone: activity.timeZone,
     deadline: activity.deadline ? activity.deadline.toISOString() : null,
     createdAt: activity.createdAt.toISOString(),
     updatedAt: activity.updatedAt.toISOString(),
@@ -324,6 +335,7 @@ export async function createActivity(ownerId: string, input: CreateActivityInput
           deadline: input.deadline ? new Date(input.deadline) : null,
           coverTheme: input.coverTheme,
           coverImage: input.coverImage || null,
+          timeZone: input.timeZone,
           locationName: input.location?.name ?? null,
           locationAddress: input.location?.address ?? null,
           locationLat: input.location?.lat ?? null,

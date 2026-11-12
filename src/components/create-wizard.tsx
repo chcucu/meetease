@@ -319,6 +319,7 @@ export function CreateWizard({ userName }: { userName: string }) {
       deadline: draft.deadline ? new Date(draft.deadline).toISOString() : null,
       coverTheme: draft.theme,
       coverImage: draft.coverImage.trim() || null,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Shanghai",
       location:
         draft.locationName.trim() || draft.locationAddress.trim()
           ? {

@@ -20,8 +20,10 @@ import {
 } from "lucide-react";
 import { CoverPoster } from "./cover-poster";
 import { ShareButton } from "./share-dialog";
+import { CalendarLinks } from "./calendar-links";
+import { DeadlineCountdown } from "./deadline-countdown";
 import { Avatar, AvatarStack, StatusPill } from "./ui";
-import { deadlineState, formatDateTime, isPast, relativeTime } from "@/lib/format";
+import { deadlineState, formatDateTime, isPast, relativeTime, timeZoneLabel } from "@/lib/format";
 import type { ActivityDetail, ActivitySnapshot, PublicField, PublicOption } from "@/lib/types";
 
 function getClientKey(code: string) {
@@ -340,6 +342,7 @@ export function ParticipantExperience({
           theme={activity.coverTheme}
           coverImage={activity.coverImage}
           deadline={activity.deadline}
+          timeZone={activity.timeZone}
           organizer={activity.organizer.name}
           fee={activity.fee?.amount ?? null}
           shareCode={activity.shareCode}
@@ -351,8 +354,25 @@ export function ParticipantExperience({
         <MetaCell
           icon={<Clock3 size={14} />}
           label="截止"
-          value={activity.deadline ? formatDateTime(activity.deadline) : "未设置"}
-          note={state.label}
+          value={
+            activity.deadline
+              ? formatDateTime(activity.deadline, activity.timeZone)
+              : "未设置"
+          }
+          note={
+            activity.deadline ? (
+              <span className="flex flex-wrap items-center gap-1">
+                <span>{timeZoneLabel(activity.timeZone)}</span>
+                <span>·</span>
+                <DeadlineCountdown
+                  deadline={activity.deadline}
+                  status={activity.status}
+                />
+              </span>
+            ) : (
+              state.label
+            )
+          }
         />
         <MetaCell
           icon={<Users size={14} />}
@@ -459,15 +479,29 @@ export function ParticipantExperience({
                 </div>
 
                 {timeOptions.length > 0 && (
-                  <OptionGroup
-                    title="时间"
-                    hint={activity.voteType === "single" ? "选一个时间" : "可以选择多个时间"}
-                    options={timeOptions}
-                    selected={selected}
-                    showCounts={showCounts}
-                    totalVotes={activity.counts.participants}
-                    onToggle={toggleOption}
-                  />
+                  <>
+                    <OptionGroup
+                      title="时间"
+                      hint={activity.voteType === "single" ? "选一个时间" : "可以选择多个时间"}
+                      footnote={`时间均为 ${timeZoneLabel(activity.timeZone)}`}
+                      options={timeOptions}
+                      selected={selected}
+                      showCounts={showCounts}
+                      totalVotes={activity.counts.participants}
+                      onToggle={toggleOption}
+                    />
+                    <div className="mt-3">
+                      <p className="mb-2 text-[11px] text-muted">加入日历</p>
+                      <CalendarLinks
+                        code={activity.shareCode}
+                        title={activity.title}
+                        description={activity.description}
+                        location={activity.location?.address || activity.location?.name}
+                        options={timeOptions}
+                        compact
+                      />
+                    </div>
+                  </>
                 )}
 
                 {placeOptions.length > 0 && (
@@ -659,7 +693,17 @@ export function ParticipantExperience({
                 <dt className="flex items-center gap-1.5 text-muted">
                   <Clock3 size={11} /> 截止时间
                 </dt>
-                <dd className="text-right">{activity.deadline ? formatDateTime(activity.deadline) : "未设置"}</dd>
+                <dd className="text-right">
+                  {activity.deadline
+                    ? formatDateTime(activity.deadline, activity.timeZone)
+                    : "未设置"}
+                </dd>
+              </div>
+              <div className="flex items-start justify-between gap-3">
+                <dt className="flex items-center gap-1.5 text-muted">
+                  <Clock3 size={11} /> 时区
+                </dt>
+                <dd>{timeZoneLabel(activity.timeZone)}</dd>
               </div>
               <div className="flex items-start justify-between gap-3">
                 <dt className="flex items-center gap-1.5 text-muted">
@@ -767,7 +811,7 @@ function MetaCell({
   icon: React.ReactNode;
   label: string;
   value: string;
-  note: string;
+  note: React.ReactNode;
 }) {
   return (
     <div className="bg-surface px-4 py-3.5">
@@ -784,6 +828,7 @@ function MetaCell({
 function OptionGroup({
   title,
   hint,
+  footnote,
   options,
   selected,
   showCounts,
@@ -792,6 +837,7 @@ function OptionGroup({
 }: {
   title: string;
   hint: string;
+  footnote?: string;
   options: PublicOption[];
   selected: string[];
   showCounts: boolean;
@@ -804,6 +850,7 @@ function OptionGroup({
         <p className="field-label mb-0">{title}</p>
         <p className="text-[11px] text-muted">{hint}</p>
       </div>
+      {footnote && <p className="mb-2 text-[10px] text-muted">{footnote}</p>}
       <div className="space-y-2">
         {options.map((option) => {
           const isSelected = selected.includes(option.id);

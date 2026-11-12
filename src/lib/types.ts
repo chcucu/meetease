@@ -91,6 +91,7 @@ export type ActivitySummary = {
   allowSuggestions: boolean;
   coverTheme: string;
   coverImage: string | null;
+  timeZone: string;
   deadline: string | null;
   createdAt: string;
   updatedAt: string;
@@ -122,6 +123,7 @@ export type ActivitySnapshot = {
     status: "open" | "closed";
     voteType: VoteMode;
     deadline: string | null;
+    timeZone: string;
     feeAmount: number | null;
     feeNote: string | null;
     allowSuggestions: boolean;

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidTimeZone } from "./format";
 
 export const categoryValues = ["social", "dinner", "sport", "travel", "workshop", "other"] as const;
 export const themeValues = ["lime", "coral", "ink", "sky", "sand", "lilac"] as const;
@@ -29,6 +30,8 @@ const optionSchema = z.object({
   lng: z.number().min(-180).max(180).nullable().optional(),
 });
 
+export const addOptionSchema = optionSchema;
+
 const fieldSchema = z.object({
   label: z.string().trim().min(1, "问题不能为空").max(60, "问题过长"),
   type: z.enum(fieldTypes),
@@ -45,6 +48,12 @@ export const createActivitySchema = z.object({
   allowSuggestions: z.boolean().default(true),
   deadline: dateValue,
   coverTheme: z.enum(themeValues).default("lime"),
+  timeZone: z
+    .string()
+    .trim()
+    .max(64)
+    .refine(isValidTimeZone, "时区无效")
+    .default("Asia/Shanghai"),
   coverImage: z
     .string()
     .trim()
@@ -122,5 +131,6 @@ export const loginSchema = z.object({
 });
 
 export type CreateActivityInput = z.infer<typeof createActivitySchema>;
+export type AddOptionInput = z.infer<typeof addOptionSchema>;
 export type RespondInput = z.infer<typeof respondSchema>;
 export type SuggestionInput = z.infer<typeof suggestionSchema>;

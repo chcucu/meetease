@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { ArrowUpRight, MessageSquare, Search, Users } from "lucide-react";
+import { ArrowUpRight, Copy, Loader2, MessageSquare, Search, Users } from "lucide-react";
 import { CoverPoster } from "./cover-poster";
 import { ShareButton } from "./share-dialog";
 import { EmptyState } from "./ui";
@@ -18,8 +19,28 @@ const TABS = [
 type Tab = (typeof TABS)[number]["value"];
 
 export function DashboardList({ activities }: { activities: ActivitySummary[] }) {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("all");
   const [query, setQuery] = useState("");
+  const [copying, setCopying] = useState<string | null>(null);
+
+  async function duplicate(shareCode: string) {
+    setCopying(shareCode);
+    try {
+      const response = await fetch(`/api/activities/${shareCode}/duplicate`, {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        router.push(`/app/${data.code}`);
+        router.refresh();
+      }
+    } catch {
+      // Leave the dashboard unchanged when the network blips.
+    } finally {
+      setCopying(null);
+    }
+  }
 
   const filtered = useMemo(() => {
     return activities.filter((activity) => {
@@ -113,6 +134,7 @@ export function DashboardList({ activities }: { activities: ActivitySummary[] })
                   theme={activity.coverTheme}
                   coverImage={activity.coverImage}
                   deadline={activity.deadline}
+                  timeZone={activity.timeZone}
                   status={activity.status}
                   shareCode={activity.shareCode}
                 />
@@ -162,6 +184,20 @@ export function DashboardList({ activities }: { activities: ActivitySummary[] })
                     compact
                     className="btn btn-ghost btn-sm px-2.5"
                   />
+                  <button
+                    type="button"
+                    onClick={() => void duplicate(activity.shareCode)}
+                    disabled={copying === activity.shareCode}
+                    className="flex h-[34px] w-[34px] shrink-0 items-center justify-center border border-line-strong transition-colors hover:border-ink hover:bg-paper"
+                    aria-label="复制为新的决策"
+                    title="复制为新的决策"
+                  >
+                    {copying === activity.shareCode ? (
+                      <Loader2 size={13} className="animate-spin" />
+                    ) : (
+                      <Copy size={13} />
+                    )}
+                  </button>
                   <Link
                     href={`/a/${activity.shareCode}`}
                     className="flex h-[34px] w-[34px] items-center justify-center border border-line-strong transition-colors hover:border-ink hover:bg-paper"

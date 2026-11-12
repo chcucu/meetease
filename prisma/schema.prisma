@@ -42,6 +42,7 @@ model Activity {
   deadline         DateTime?
   coverTheme       String   @default("lime")
   coverImage       String?
+  timeZone         String   @default("Asia/Shanghai")
   locationName     String?
   locationAddress  String?
   locationLat      Float?
