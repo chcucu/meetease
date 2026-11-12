@@ -1,6 +1,6 @@
 import { formatDateTime } from "@/lib/format";
 import { coverPalette } from "@/lib/cover";
-import { categoryLabel, categoryShort } from "@/lib/types";
+import { categoryLabel } from "@/lib/types";
 import { StatusPill } from "./ui";
 
 function Pattern({ type, color }: { type: string; color: string }) {
@@ -119,10 +119,10 @@ export function CoverPoster({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p
-              className={`font-mono uppercase ${hero ? "text-[10px]" : "text-[9px]"}`}
+              className={`font-mono uppercase ${hero ? "text-[11px]" : "text-[10px]"}`}
               style={{ letterSpacing: "0.2em", color: muted }}
             >
-              {categoryShort(category)} / {categoryLabel(category)}
+              {categoryLabel(category)}
             </p>
           </div>
           {status && (
@@ -150,7 +150,7 @@ export function CoverPoster({
           <div className="space-y-1.5">
             {deadline && (
               <p
-                className={`font-mono uppercase ${hero ? "text-[10px]" : "text-[9px]"}`}
+                className={`font-mono uppercase ${hero ? "text-[11px]" : "text-[10px]"}`}
                 style={{ letterSpacing: "0.1em", color: muted }}
               >
                 {formatDateTime(deadline)} 截止
@@ -168,7 +168,7 @@ export function CoverPoster({
           {shareCode && (
             <span
               className={`shrink-0 border px-2 py-1 font-mono uppercase ${
-                hero ? "text-[10px]" : "text-[9px]"
+                hero ? "text-[11px]" : "text-[10px]"
               }`}
               style={{ borderColor: accent, color: accent, letterSpacing: "0.16em" }}
             >

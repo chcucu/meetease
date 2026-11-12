@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { LayoutGrid, LogOut, Plus, Sparkles } from "lucide-react";
+import { LayoutGrid, LogOut, Plus } from "lucide-react";
 import type { AuthUser } from "./auth-provider";
 import { useAuth } from "./auth-provider";
 import { Logo } from "./logo";
@@ -31,8 +31,6 @@ export function AppShell({ user, children }: { user: AuthUser; children: React.R
         <div className="container-page flex h-[64px] items-center justify-between gap-6">
           <div className="flex items-center gap-5">
             <Logo />
-            <span className="hidden h-4 w-px bg-line-strong sm:block" />
-            <span className="label hidden text-[9px] sm:block">WORKSPACE / 工作台</span>
           </div>
 
           <nav className="hidden items-center gap-1 md:flex" aria-label="工作台导航">
@@ -54,10 +52,9 @@ export function AppShell({ user, children }: { user: AuthUser; children: React.R
             })}
             <Link
               href="/a/DINNER"
-              className="ml-2 flex items-center gap-1.5 px-3 py-1.5 text-[13px] text-muted transition-colors hover:text-ink"
+              className="ml-2 px-3 py-1.5 text-[13px] text-muted transition-colors hover:text-ink"
             >
-              <Sparkles size={13} />
-              演示活动
+              示例
             </Link>
           </nav>
 
@@ -83,14 +80,14 @@ export function AppShell({ user, children }: { user: AuthUser; children: React.R
 
         {open && (
           <div className="absolute right-4 top-[calc(100%+6px)] w-60 border border-line bg-surface p-2 shadow-[4px_4px_0_rgba(23,23,20,0.9)] sm:right-[max(1rem,calc((100%-1280px)/2+3.25rem))]">
-            <p className="px-2 pb-1.5 pt-1 font-mono text-[10px] tracking-wide text-muted">
+            <p className="px-2 pb-1.5 pt-1 text-[11px] text-muted">
               {user.email}
             </p>
             <Link href="/app" className="block rounded-sm px-2 py-2 text-sm hover:bg-acid-soft">
-              我的工作台
+              工作台
             </Link>
             <Link href="/new" className="block rounded-sm px-2 py-2 text-sm hover:bg-acid-soft">
-              发起新决策
+              新建决策
             </Link>
             <button
               type="button"

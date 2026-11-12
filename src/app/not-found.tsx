@@ -14,13 +14,12 @@ export default function NotFound() {
               4<span className="serif-italic text-coral">0</span>4
             </p>
             <div className="max-w-lg lg:pb-4">
-              <p className="label mb-3">DEAD END / 这里没有决策</p>
               <h1 className="font-display text-[clamp(2rem,4.4vw,3.4rem)] leading-[1.02] tracking-[-0.03em]">
-                这张卡不存在，<br />
-                或者已经被收走了。
+                页面不存在，<br />
+                或已被删除。
               </h1>
               <p className="mt-4 text-[13px] leading-6 text-muted">
-                分享码是六位字母与数字的组合。检查一下链接有没有拼错，或者向发起人要一个新的。
+                分享码为六位字母与数字。请检查链接是否完整，或向发起人获取新的链接。
               </p>
               <div className="mt-7 flex flex-wrap items-center gap-2">
                 <Link href="/" className="btn btn-primary">
@@ -35,9 +34,7 @@ export default function NotFound() {
 
           <div className="mt-16 flex items-center gap-3 border-t border-line pt-5">
             <LogoMark size={24} />
-            <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted">
-              Quorum — 一群人，一个答案
-            </p>
+            <p className="text-[11px] text-muted">Quorum · 群体决策工具</p>
           </div>
         </div>
       </main>

@@ -7,12 +7,10 @@ export function AuthLayout({
   children,
   asideTitle,
   asideBody,
-  asideLabel,
 }: {
   children: React.ReactNode;
   asideTitle: React.ReactNode;
   asideBody: string;
-  asideLabel: string;
 }) {
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.02fr_0.98fr]">
@@ -33,9 +31,7 @@ export function AuthLayout({
         </div>
 
         <div className="px-6 py-5 sm:px-10">
-          <p className="font-mono text-[9px] tracking-[0.12em] text-muted">
-            QUORUM · GROUP DECISION SYSTEM · 2026
-          </p>
+          <p className="text-[11px] text-muted">© 2026 Quorum</p>
         </div>
       </div>
 
@@ -46,11 +42,10 @@ export function AuthLayout({
           aria-hidden="true"
         />
 
-        <div className="relative flex items-center justify-between">
-          <span className="label text-[9px] text-paper/50">{asideLabel}</span>
+        <div className="relative flex items-center justify-start">
           <span className="flex items-center gap-2">
             <span className="live-dot" />
-            <span className="font-mono text-[9px] tracking-wide text-paper/60">SYSTEM ONLINE</span>
+            <span className="text-[12px] text-paper/60">实时同步</span>
           </span>
         </div>
 
@@ -63,11 +58,11 @@ export function AuthLayout({
           <div className="mt-10 max-w-[400px] border border-paper/20 bg-paper p-4 text-ink shadow-[5px_5px_0_rgba(217,255,67,0.85)]">
             <div className="flex items-start justify-between border-b border-line pb-3">
               <div>
-                <p className="label text-[8px]">LIVE RESULT / DINNER</p>
-                <p className="mt-1 font-display text-lg leading-tight">周六，去城外吃一顿</p>
+                <p className="font-display text-lg leading-tight">周六，去城外吃一顿</p>
               </div>
-              <span className="chip border-line bg-paper text-[8px]">
-                <span className="live-dot" /> LIVE
+              <span className="chip border-line bg-paper">
+                <span className="live-dot" />
+                投票中
               </span>
             </div>
             <div className="mt-3 space-y-2">
@@ -92,14 +87,14 @@ export function AuthLayout({
             </div>
             <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
               <AvatarStack names={["阿策", "Momo", "周周", "Ken", "小满"]} max={5} />
-              <span className="font-mono text-[8px] text-muted">9 人已参与</span>
+              <span className="text-[11px] text-muted">9 人已参与</span>
             </div>
           </div>
         </div>
 
         <div className="relative grid grid-cols-3 gap-4 border-t border-paper/15 pt-5">
-          {["免注册链接", "实时结果", "一键导出"].map((item) => (
-            <div key={item} className="flex items-center gap-2 text-[11px] text-paper/65">
+          {["无需注册", "实时结果", "CSV 导出"].map((item) => (
+            <div key={item} className="flex items-center gap-2 text-[12px] text-paper/65">
               <Check size={12} className="text-acid" />
               {item}
             </div>

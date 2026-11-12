@@ -53,7 +53,7 @@ async function main() {
       ownerId: demo.id,
       title: "周六，去城外吃一顿",
       description:
-        "天气转凉，想找个有院子的地方慢慢吃、慢慢聊。时间地点都放这儿了，投完票我就订位。",
+        "周六晚餐，地点暂定梧桐小院。请选择可行时间与偏好地点，截止后按人数订位。",
       category: "dinner",
       voteType: "single",
       allowSuggestions: true,
@@ -68,9 +68,9 @@ async function main() {
       feeNote: "含餐位与酒水，多退少补",
       options: {
         create: [
-          { kind: "time", label: "周六 17:30", note: "看完日落刚好", startsAt: at(3, 17, 30), endsAt: at(3, 21, 0), sortOrder: 0 },
-          { kind: "time", label: "周六 19:00", note: "下班晚也来得及", startsAt: at(3, 19, 0), endsAt: at(3, 22, 0), sortOrder: 1 },
-          { kind: "time", label: "周日 12:00", note: "午市更安静", startsAt: at(4, 12, 0), endsAt: at(4, 15, 0), sortOrder: 2 },
+          { kind: "time", label: "周六 17:30", note: "预计 3 小时", startsAt: at(3, 17, 30), endsAt: at(3, 21, 0), sortOrder: 0 },
+          { kind: "time", label: "周六 19:00", note: "预计 3 小时", startsAt: at(3, 19, 0), endsAt: at(3, 22, 0), sortOrder: 1 },
+          { kind: "time", label: "周日 12:00", note: "预计 3 小时", startsAt: at(4, 12, 0), endsAt: at(4, 15, 0), sortOrder: 2 },
           { kind: "place", label: "梧桐小院", note: "有院子 · 人均 168", lat: 30.2287, lng: 120.1178, sortOrder: 0 },
           { kind: "place", label: "江边炭火", note: "露台 · 人均 140", lat: 30.2171, lng: 120.1521, sortOrder: 1 },
           { kind: "place", label: "老城区小馆", note: "安静 · 人均 110", lat: 30.2452, lng: 120.1689, sortOrder: 2 },
@@ -142,7 +142,7 @@ async function main() {
   const s1 = await prisma.suggestion.create({
     data: {
       activityId: saturday.id,
-      content: "能不能改成周五晚上？周六要加班到七点。",
+      content: "是否可以改到周五 19:00？周六需要加班。",
       authorName: "小满",
       kind: "time",
       createdAt: new Date(now - 40 * 60 * 1000),
@@ -151,7 +151,7 @@ async function main() {
   const s2 = await prisma.suggestion.create({
     data: {
       activityId: saturday.id,
-      content: "附近有家新开的精酿，吃完可以续摊。",
+      content: "附近有一家新开的精酿酒吧，餐后可以继续。",
       authorName: "阿策",
       kind: "other",
       createdAt: new Date(now - 18 * 60 * 1000),
@@ -176,7 +176,7 @@ async function main() {
       ownerId: demo.id,
       title: "读书会 · 第七期：我们为什么工作",
       description:
-        "这次聊《狗屁工作》和《毫无意义的工作》。不用读完，带着一个让你不舒服的问题来就行。",
+        "本期讨论《狗屁工作》与《毫无意义的工作》。无需读完，带着一个问题参加即可。",
       category: "workshop",
       voteType: "multiple",
       allowSuggestions: true,
@@ -192,8 +192,8 @@ async function main() {
         create: [
           { kind: "time", label: "周五 19:30", startsAt: at(5, 19, 30), endsAt: at(5, 21, 30), sortOrder: 0 },
           { kind: "time", label: "周六 14:00", startsAt: at(6, 14, 0), endsAt: at(6, 16, 0), sortOrder: 1 },
-          { kind: "place", label: "单向空间 · 花家地店", note: "有长桌，适合围坐", lat: 39.9812, lng: 116.4729, sortOrder: 0 },
-          { kind: "place", label: "某人的客厅", note: "更随意，但要凑椅子", lat: 39.9938, lng: 116.4681, sortOrder: 1 },
+          { kind: "place", label: "单向空间 · 花家地店", note: "长桌，可围坐", lat: 39.9812, lng: 116.4729, sortOrder: 0 },
+          { kind: "place", label: "某人的客厅", note: "需自备座椅", lat: 39.9938, lng: 116.4681, sortOrder: 1 },
         ],
       },
       fields: {
@@ -201,13 +201,13 @@ async function main() {
           {
             label: "想带一本什么书来？",
             type: "text",
-            placeholder: "书名或一句话都行",
+            placeholder: "书名或一句话",
             sortOrder: 0,
           },
           {
             label: "你更想聊哪个方向？",
             type: "select",
-            options: JSON.stringify(["工作意义", "组织与效率", "个人选择", "都行"]),
+            options: JSON.stringify(["工作意义", "组织与效率", "个人选择", "没有偏好"]),
             required: true,
             sortOrder: 1,
           },
@@ -245,7 +245,7 @@ async function main() {
       shareCode: code("TEAM09"),
       ownerId: demo.id,
       title: "产品组 · 春季 Offsite",
-      description: "两天一夜，离开工位。上午复盘，下午放空，晚上好好吃一顿。",
+      description: "两天一夜。上午复盘，下午自由活动，晚上聚餐。",
       category: "travel",
       voteType: "single",
       allowSuggestions: false,

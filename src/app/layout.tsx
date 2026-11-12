@@ -27,23 +27,25 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: {
-    default: "Quorum — 一群人，一个答案",
+    default: "Quorum · Group decision page",
     template: "%s · Quorum",
   },
   description:
-    "Quorum 把时间、地点、预算和所有人的意见收进一张卡片。发一个链接，零注册投票，实时出结果。",
+    "创建决策页，分享链接，收集时间、地点与意见。参与者无需注册，结果实时汇总。",
   keywords: ["活动策划", "投票", "群组决策", "聚会", "团建", "Quorum"],
   openGraph: {
-    title: "Quorum — 一群人，一个答案",
-    description: "发一个链接，把一群人的时间拧成一个答案。",
+    title: "Quorum · Group decision page",
+    description:
+      "创建决策页，分享链接，收集时间、地点与意见。参与者无需注册，结果实时汇总。",
     type: "website",
     locale: "zh_CN",
     siteName: "Quorum",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Quorum — 一群人，一个答案",
-    description: "发一个链接，把一群人的时间拧成一个答案。",
+    title: "Quorum · Group decision page",
+    description:
+      "创建决策页，分享链接，收集时间、地点与意见。参与者无需注册，结果实时汇总。",
   },
 };
 

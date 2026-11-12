@@ -34,7 +34,6 @@ export function Logo({
       <span className="font-display text-[25px] leading-none tracking-[-0.035em] lowercase">
         quorum
       </span>
-      <span className="label mt-0.5 hidden text-[9px] tracking-[0.2em] sm:inline">共识</span>
     </Link>
   );
 }

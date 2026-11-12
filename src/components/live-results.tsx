@@ -19,7 +19,6 @@ import { ShareButton } from "./share-dialog";
 import { TallyBoard } from "./tally-board";
 import { AvatarStack, StatusPill } from "./ui";
 import { deadlineState, formatDateTime, isPast, relativeTime } from "@/lib/format";
-import { categoryLabel } from "@/lib/types";
 import type { ActivityDetail, ActivitySnapshot } from "@/lib/types";
 
 type Connection = "connecting" | "live" | "offline";
@@ -130,24 +129,16 @@ export function LiveResults({
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href={`/a/${code}`}
-                className="flex items-center gap-1.5 font-mono text-[10px] tracking-[0.12em] text-paper/55 transition-colors hover:text-acid"
+                className="flex items-center gap-1.5 text-[11px] text-paper/60 transition-colors hover:text-acid"
               >
                 <ArrowLeft size={12} />
-                BACK TO CARD
+                返回决策页
               </Link>
-              <span className="h-3 w-px bg-paper/20" />
-              <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em]">
-                <span className="live-dot" />
-                Live tally
-              </span>
-              <span className="hidden font-mono text-[10px] tracking-wide text-paper/40 sm:inline">
-                / {categoryLabel(initialActivity.category)}
-              </span>
             </div>
 
             <div className="flex items-center gap-3">
               <span
-                className={`flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.14em] ${
+                className={`flex items-center gap-1.5 text-[11px] ${
                   connection === "live" ? "text-acid" : "text-paper/45"
                 }`}
               >
@@ -167,14 +158,14 @@ export function LiveResults({
           <div className="mt-7 grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div>
               <div className="mb-4 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-paper/70">
+                <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 font-mono text-[10px] tracking-[0.1em] text-paper/70">
                   {snapshot.activity.shareCode}
                 </span>
-                <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-paper/70">
-                  {closed ? "FINAL" : "OPEN"}
+                <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 text-[10px] text-paper/70">
+                  {closed ? "已结束" : "进行中"}
                 </span>
                 {snapshot.activity.deadline && (
-                  <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-paper/70">
+                  <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 text-[10px] text-paper/70">
                     {formatDateTime(snapshot.activity.deadline)} 截止
                   </span>
                 )}
@@ -184,9 +175,9 @@ export function LiveResults({
                 {snapshot.activity.title}
               </h1>
               <p className="mt-4 max-w-[560px] text-[13px] leading-6 text-paper/55">
-                {initialActivity.description || "答案正在被投票写出来。这一页会实时更新。"}
+                {initialActivity.description || "实时投票结果。有新票时此页面会自动更新。"}
               </p>
-              <p className="mt-4 flex flex-wrap items-center gap-2 font-mono text-[10px] tracking-wide text-paper/40">
+              <p className="mt-4 flex flex-wrap items-center gap-2 text-[11px] text-paper/40">
                 <span>发起人 {initialActivity.organizer.name}</span>
                 <span>·</span>
                 <span>{state.label}</span>
@@ -205,7 +196,7 @@ export function LiveResults({
           {closed && (
             <div className="mt-7 flex flex-wrap items-center gap-2.5 border border-acid/40 bg-acid/10 px-3.5 py-2.5 text-[11px] text-acid">
               <Lock size={13} />
-              这张决策卡已经结束投票，下面是最终结果。
+              投票已结束，以下为最终结果。
             </div>
           )}
         </div>
@@ -215,23 +206,19 @@ export function LiveResults({
         <div>
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3 border-b border-line pb-4">
             <div>
-              <p className="label mb-1.5">LIVE COUNT / 实时票数</p>
               <h2 className="font-display text-[30px] leading-tight">
                 {leading ? (
                   <>
                     目前领先：<span className="serif-italic">{leading.label}</span>
                   </>
                 ) : (
-                  "等第一票出现"
+                  "暂无投票"
                 )}
               </h2>
             </div>
             <div className="text-right">
-              <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-                {closed ? "FINAL TALLY" : "UPDATES IN REAL TIME"}
-              </p>
-              <p className="mt-1 text-[11px] text-muted">
-                {voters > 0 ? `${voters} 人已投，${snapshot.counts.votes} 张票` : "分享链接，让答案开始"}
+              <p className="text-[11px] text-muted">
+                {voters > 0 ? `${voters} 人已投，共 ${snapshot.counts.votes} 票` : "暂无投票"}
               </p>
             </div>
           </div>
@@ -239,20 +226,19 @@ export function LiveResults({
           <TallyBoard
             options={snapshot.options}
             voters={voters}
-            emptyHint="这张卡还没有人投票。把链接发给朋友，他们会在这里实时出现。"
+            emptyHint="暂无投票。分享链接后，结果会实时显示在这里。"
           />
 
           <section className="mt-10 border-t border-line pt-8">
             <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="label mb-1.5">PROPOSALS / 提议</p>
-                <h2 className="font-display text-[26px] leading-tight">被附议最多的可能</h2>
+                <h2 className="font-display text-[26px] leading-tight">提议排行</h2>
               </div>
               <Link
                 href={`/a/${code}`}
                 className="flex items-center gap-1.5 text-[12px] text-muted transition-colors hover:text-ink"
               >
-                去提议
+                添加提议
                 <ArrowUpRight size={13} />
               </Link>
             </div>
@@ -260,9 +246,9 @@ export function LiveResults({
             {suggestions.length === 0 ? (
               <div className="border border-dashed border-line-strong bg-surface/60 px-5 py-10 text-center">
                 <MessageSquare size={18} className="mx-auto text-muted" />
-                <p className="mt-2 font-display text-xl">还没有提议</p>
+                <p className="mt-2 font-display text-xl">暂无提议</p>
                 <p className="mt-1 text-[11px] text-muted">
-                  有更好的时间或地点？回到决策卡写一条。
+                  可回到决策页添加时间或地点。
                 </p>
               </div>
             ) : (
@@ -272,12 +258,12 @@ export function LiveResults({
                     key={suggestion.id}
                     className="flex items-start gap-4 border-b border-line px-4 py-3.5 last:border-b-0"
                   >
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center border border-line-strong bg-paper font-mono text-[9px]">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center border border-line-strong bg-paper text-[10px] text-muted">
                       {index + 1}
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="text-[13px] leading-5">{suggestion.content}</p>
-                      <p className="mt-1.5 font-mono text-[9px] tracking-wide text-muted">
+                      <p className="mt-1.5 text-[11px] text-muted">
                         {suggestion.authorName} · {relativeTime(suggestion.createdAt)} ·{" "}
                         {suggestion.kind === "time"
                           ? "时间"
@@ -301,12 +287,12 @@ export function LiveResults({
           {isOwner && (
             <div className="border border-ink bg-surface shadow-[4px_4px_0_rgba(23,23,20,0.92)]">
               <div className="flex items-center justify-between border-b border-line px-4 py-3">
-                <p className="label text-[9px]">ORGANIZER / 组织者</p>
+                <p className="text-[12px] font-medium">组织者</p>
                 <Settings2 size={12} className="text-muted" />
               </div>
               <div className="space-y-3 p-4">
                 <p className="text-[11px] leading-5 text-muted">
-                  你是这张卡的发起人。可以随时关闭投票、导出数据或进入控制台。
+                  你可以关闭投票、导出数据或进入控制台。
                 </p>
                 <button
                   type="button"
@@ -342,11 +328,11 @@ export function LiveResults({
 
           <div className="border border-line bg-surface p-4">
             <div className="flex items-center justify-between border-b border-line pb-3">
-              <p className="label text-[9px]">SHARE / 邀请</p>
+              <p className="text-[12px] font-medium">分享</p>
               <span className="live-dot" />
             </div>
             <p className="mt-3 text-[12px] leading-5 text-muted">
-              扫码或打开链接，朋友不用注册就能投票。
+              参与者无需注册，打开链接即可投票。
             </p>
             <div className="mt-3 flex items-stretch border border-line-strong bg-paper">
               <span className="flex flex-1 items-center select-all px-2.5 py-2 font-mono text-[11px] text-ink-2">
@@ -371,11 +357,11 @@ export function LiveResults({
 
           <div className="border border-line bg-surface p-4">
             <div className="mb-3 flex items-center justify-between">
-              <p className="label text-[9px]">WHO&apos;S IN</p>
-              <span className="font-mono text-[9px] text-muted">{voters}</span>
+              <p className="text-[12px] font-medium">已参与</p>
+              <span className="text-[11px] text-muted">{voters}</span>
             </div>
             {voters === 0 ? (
-              <p className="text-[11px] leading-5 text-muted">还没有人参与。分享链接，等第一个名字出现。</p>
+              <p className="text-[11px] leading-5 text-muted">暂无参与者。分享链接后，名单会显示在这里。</p>
             ) : (
               <>
                 <AvatarStack names={snapshot.participants.map((participant) => participant.name)} max={8} />
@@ -389,7 +375,7 @@ export function LiveResults({
                     </span>
                   ))}
                   {voters > 10 && (
-                    <span className="px-1 py-0.5 font-mono text-[9px] text-muted">
+                    <span className="px-1 py-0.5 text-[10px] text-muted">
                       +{voters - 10}
                     </span>
                   )}
@@ -401,10 +387,10 @@ export function LiveResults({
           <div className="border border-line bg-paper-deep/60 p-4">
             <div className="flex items-center gap-2">
               <Users size={12} className="text-muted" />
-              <p className="label text-[9px]">HOW IT WORKS</p>
+              <p className="text-[12px] font-medium">投票规则</p>
             </div>
             <p className="mt-2.5 text-[11px] leading-5 text-muted">
-              每位参与者提交后才会看到票数，避免从众。每次投票都会在几秒内出现在这一页。
+              参与者提交后才会看到票数，避免从众。新票通常在数秒内同步。
             </p>
           </div>
         </aside>
@@ -422,7 +408,7 @@ export function LiveResults({
               <ArrowUpRight size={12} />
             </Link>
             <Link href="/" className="btn btn-primary btn-sm">
-              我也想发起一个
+              创建决策页
             </Link>
           </div>
         </div>
@@ -435,7 +421,7 @@ function BigStat({ value, label }: { value: number; label: string }) {
   return (
     <div>
       <p className="font-display text-[clamp(2rem,3.4vw,3rem)] leading-none">{value}</p>
-      <p className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-paper/45">{label}</p>
+      <p className="mt-1.5 text-[11px] text-paper/45">{label}</p>
     </div>
   );
 }

@@ -46,12 +46,11 @@ export default async function PublicActivityPage({ params }: Props) {
           <div className="flex items-center gap-2">
             <LogoMark size={22} />
             <span className="font-display text-lg lowercase">quorum</span>
-            <span className="font-mono text-[9px] tracking-wide text-muted">共识</span>
           </div>
           <p className="text-[11px] text-muted">
-            这张决策卡由 Quorum 生成 ·{" "}
+            由 Quorum 提供 ·{" "}
             <Link href="/" className="link-underline text-ink">
-              我也想发起一个
+              创建决策页
             </Link>
           </p>
         </div>

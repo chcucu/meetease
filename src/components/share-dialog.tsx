@@ -82,8 +82,7 @@ export function ShareButton({
           >
             <div className="flex items-start justify-between border-b border-line px-5 py-4">
               <div>
-                <p className="label mb-1.5">Share / 邀请</p>
-                <h3 className="font-display text-2xl leading-tight">把链接发出去</h3>
+                <h3 className="font-display text-2xl leading-tight">分享决策页</h3>
               </div>
               <button
                 type="button"
@@ -102,7 +101,7 @@ export function ShareButton({
               <div className="min-w-0">
                 <p className="text-sm font-medium">{title}</p>
                 <p className="mt-1.5 text-xs leading-5 text-muted">
-                  对方无需注册。扫码或打开链接，填写名字即可投票。
+                  参与者无需注册。扫码或打开链接，填写姓名即可投票。
                 </p>
                 <div className="mt-4 flex items-stretch border border-line-strong bg-paper">
                   <input
@@ -122,16 +121,22 @@ export function ShareButton({
                 </div>
                 <button type="button" onClick={() => void nativeShare()} className="btn btn-dark btn-sm mt-3 w-full">
                   <Share2 size={13} />
-                  调用系统分享
+                  系统分享
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 border-t border-line bg-paper/60 px-5 py-3">
-              <span className="live-dot" />
-              <p className="font-mono text-[10px] tracking-wide text-muted">
-                分享码 {url.split("/").pop()?.toUpperCase()} · 随时可关闭投票
+            <div className="flex items-center justify-between border-t border-line bg-paper/60 px-5 py-3">
+              <p className="text-[11px] text-muted">
+                分享码 {url.split("/").pop()?.toUpperCase()}
               </p>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="text-[11px] text-muted transition-colors hover:text-ink"
+              >
+                关闭
+              </button>
             </div>
           </div>
         </div>

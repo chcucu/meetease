@@ -42,8 +42,8 @@ export function DashboardList({ activities }: { activities: ActivitySummary[] })
       <section className="mt-12">
         <EmptyState
           title="还没有决策卡"
-          description="建一张卡，把时间、地点和问题一次说清。三分钟后发出去，剩下的交给链接。"
-          action={{ href: "/new", label: "创建第一张决策卡" }}
+          description="创建一张决策卡，添加时间、地点与问题，然后分享链接。"
+          action={{ href: "/new", label: "创建决策卡" }}
         />
       </section>
     );
@@ -53,7 +53,6 @@ export function DashboardList({ activities }: { activities: ActivitySummary[] })
     <section className="mt-12">
       <div className="mb-6 flex flex-col justify-between gap-4 border-b border-line pb-4 sm:flex-row sm:items-end">
         <div>
-          <p className="label mb-1.5">ALL DECISIONS</p>
           <h2 className="font-display text-[28px] leading-tight">所有决策</h2>
         </div>
 
@@ -121,24 +120,24 @@ export function DashboardList({ activities }: { activities: ActivitySummary[] })
 
               <div className="flex flex-1 flex-col p-5">
                 <p className="line-clamp-2 min-h-[40px] text-[13px] leading-5 text-muted">
-                  {activity.description || "暂无描述，打开控制台补充细节。"}
+                  {activity.description || "暂无描述。"}
                 </p>
 
                 <div className="mt-4 grid grid-cols-3 gap-2 border-y border-line py-3">
                   <div>
                     <p className="font-display text-xl leading-none">{activity.counts.participants}</p>
-                    <p className="mt-1 flex items-center gap-1 font-mono text-[8px] tracking-wide text-muted">
-                      <Users size={9} /> 参与者
+                    <p className="mt-1 flex items-center gap-1 text-[10px] text-muted">
+                      <Users size={10} /> 参与者
                     </p>
                   </div>
                   <div>
                     <p className="font-display text-xl leading-none">{activity.counts.votes}</p>
-                    <p className="mt-1 font-mono text-[8px] tracking-wide text-muted">票数</p>
+                    <p className="mt-1 text-[10px] text-muted">票数</p>
                   </div>
                   <div>
                     <p className="font-display text-xl leading-none">{activity.counts.suggestions}</p>
-                    <p className="mt-1 flex items-center gap-1 font-mono text-[8px] tracking-wide text-muted">
-                      <MessageSquare size={9} /> 提议
+                    <p className="mt-1 flex items-center gap-1 text-[10px] text-muted">
+                      <MessageSquare size={10} /> 提议
                     </p>
                   </div>
                 </div>
@@ -172,7 +171,7 @@ export function DashboardList({ activities }: { activities: ActivitySummary[] })
                   </Link>
                 </div>
 
-                <p className="mt-3 font-mono text-[9px] tracking-wide text-muted/80">
+                <p className="mt-3 text-[11px] text-muted">
                   更新于 {relativeTime(activity.updatedAt)}
                 </p>
               </div>

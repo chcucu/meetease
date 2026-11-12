@@ -8,10 +8,10 @@ import { useAuth } from "./auth-provider";
 import { Logo } from "./logo";
 
 const NAV = [
-  { href: "/#how", index: "01", label: "工作原理" },
-  { href: "/#features", index: "02", label: "能力" },
-  { href: "/#live", index: "03", label: "实时结果" },
-  { href: "/a/DINNER", index: "04", label: "打开实例" },
+  { href: "/#how", label: "工作原理" },
+  { href: "/#features", label: "能力" },
+  { href: "/#live", label: "实时结果" },
+  { href: "/a/DINNER", label: "示例" },
 ];
 
 export function SiteHeader() {
@@ -30,10 +30,9 @@ export function SiteHeader() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="group flex items-center gap-1.5 text-[13px] text-ink-2 transition-colors hover:text-ink"
+                className="text-[13px] text-ink-2 transition-colors hover:text-ink"
               >
-                <span className="font-mono text-[9px] text-muted/70">{item.index}</span>
-                <span>{item.label}</span>
+                {item.label}
               </Link>
             ))}
           </nav>
@@ -86,7 +85,7 @@ export function SiteHeader() {
                 登录
               </Link>
               <Link href="/register" className="btn btn-primary btn-sm">
-                创建一次决策
+                创建决策
                 <ArrowUpRight size={14} strokeWidth={2} />
               </Link>
             </>
@@ -111,10 +110,9 @@ export function SiteHeader() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center justify-between border-b border-line/70 py-3 text-sm"
+                className="border-b border-line/70 py-3 text-sm"
               >
-                <span>{item.label}</span>
-                <span className="font-mono text-[10px] text-muted">{item.index}</span>
+                {item.label}
               </Link>
             ))}
           </nav>

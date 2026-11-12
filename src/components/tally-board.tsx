@@ -12,7 +12,7 @@ function percentage(votes: number, voters: number) {
 export function TallyBoard({
   options,
   voters,
-  emptyHint = "还没有人投票。把链接发出去，让第一个答案出现。",
+  emptyHint = "暂无投票。分享链接后，结果会实时显示在这里。",
   compact = false,
 }: {
   options: PublicOption[];
@@ -39,7 +39,7 @@ export function TallyBoard({
   if (options.length === 0) {
     return (
       <div className="border border-dashed border-line-strong bg-surface/60 px-5 py-12 text-center">
-        <p className="font-display text-2xl">还没有可投票的选项</p>
+        <p className="font-display text-2xl">暂无选项</p>
         <p className="mx-auto mt-2 max-w-sm text-[12px] leading-6 text-muted">{emptyHint}</p>
       </div>
     );
@@ -52,9 +52,9 @@ export function TallyBoard({
           <div className="mb-2.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <group.Icon size={12} className="text-muted" />
-              <span className="label text-[9px]">{group.title}</span>
+              <span className="text-[11px] font-medium">{group.title}</span>
             </div>
-            <span className="font-mono text-[9px] tracking-wide text-muted">
+            <span className="text-[11px] text-muted">
               {group.items.length} 个选项
             </span>
           </div>
@@ -82,7 +82,7 @@ export function TallyBoard({
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex min-w-0 items-start gap-3">
                         <span
-                          className={`mt-0.5 font-mono text-[10px] leading-none ${
+                          className={`mt-0.5 text-[10px] leading-none ${
                             leading ? "text-ink" : "text-muted"
                           }`}
                         >
@@ -92,7 +92,7 @@ export function TallyBoard({
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                             <p className="text-[13px] font-medium leading-5">{option.label}</p>
                             {leading && (
-                              <span className="inline-flex items-center border border-ink bg-acid px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.12em]">
+                              <span className="inline-flex items-center border border-ink bg-acid px-1.5 py-0.5 text-[10px]">
                                 领先
                               </span>
                             )}
@@ -116,7 +116,7 @@ export function TallyBoard({
                           style={{ width: `${percent}%` }}
                         />
                       </div>
-                      <span className="w-8 shrink-0 text-right font-mono text-[9px] text-muted">
+                      <span className="w-8 shrink-0 text-right text-[10px] text-muted">
                         {percent}%
                       </span>
                       {hasVoters && (

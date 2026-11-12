@@ -6,16 +6,14 @@ export const metadata = { title: "创建账号" };
 export default function RegisterPage() {
   return (
     <AuthLayout
-      asideLabel="NEW MEMBER / 03"
       asideTitle={
         <>
-          下一次，
+          从一次<span className="text-acid">决策</span>，
           <br />
-          别再说
-          <span className="serif-italic text-acid">「都行」</span>。
+          开始。
         </>
       }
-      asideBody="做一个明确的组织者。把选项摆出来，把链接发出去，让每个人的偏好都被看见。"
+      asideBody="创建组织者账号，用于创建决策页、分享链接并管理结果。参与者无需注册。"
     >
       <RegisterForm />
     </AuthLayout>

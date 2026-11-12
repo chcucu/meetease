@@ -59,13 +59,11 @@ export function LoginForm() {
   return (
     <div>
       <div className="mb-8">
-        <p className="label mb-3">MEMBER ACCESS / 登录</p>
         <h1 className="font-display text-[clamp(2.4rem,4vw,3.3rem)] leading-[1.02] tracking-[-0.03em]">
-          回来，
-          <span className="serif-italic">继续定事</span>。
+          登录 Quorum
         </h1>
         <p className="mt-3 text-sm leading-6 text-muted">
-          登录后回到工作台，查看谁投了票、谁还没来，把结果收个尾。
+          使用组织者账号登录，查看决策、参与者与支付状态。
         </p>
       </div>
 
@@ -118,20 +116,15 @@ export function LoginForm() {
 
       <div className="my-6 flex items-center gap-3">
         <span className="h-px flex-1 bg-line" />
-        <span className="font-mono text-[9px] tracking-[0.14em] text-muted">OR</span>
+        <span className="text-[11px] text-muted">或</span>
         <span className="h-px flex-1 bg-line" />
       </div>
 
       <div className="border border-line-strong bg-acid-soft/70 p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[13px] font-medium">先看看里面长什么样</p>
-            <p className="mt-1 font-mono text-[10px] leading-5 text-ink-2">
-              demo@quorum.app · quorum123
-            </p>
-          </div>
-          <span className="chip border-ink/20 bg-paper text-[8px]">DEMO</span>
-        </div>
+        <p className="text-[13px] font-medium">演示账号</p>
+        <p className="mt-1 font-mono text-[10px] leading-5 text-ink-2">
+          demo@quorum.app · quorum123
+        </p>
         <button
           type="button"
           onClick={() => void demoLogin()}
@@ -139,14 +132,14 @@ export function LoginForm() {
           className="btn btn-dark btn-sm mt-3 w-full"
         >
           {demoLoading ? <Loader2 size={13} className="animate-spin" /> : null}
-          {demoLoading ? "正在进入…" : "用演示账号进入"}
+          {demoLoading ? "正在进入…" : "使用演示账号"}
         </button>
       </div>
 
       <p className="mt-6 text-center text-[13px] text-muted">
         还没有账号？
         <Link href="/register" className="ml-1 text-ink underline decoration-line-strong underline-offset-4 hover:decoration-ink">
-          创建一个
+          创建账号
         </Link>
       </p>
     </div>

@@ -13,14 +13,13 @@ export function SiteFooter() {
                 quorum
               </span>
             </div>
-            <p className="mt-4 max-w-[260px] text-sm leading-6 text-muted">
-              把时间、地点、预算和所有人的意见，收进一张卡片。发一个链接，等一个答案。
+            <p className="mt-4 max-w-[280px] text-sm leading-6 text-muted">
+              Quorum 是一个群体决策工具。创建决策页，分享链接，收集时间、地点与意见。
             </p>
-            <p className="label mt-6 text-[9px]">GROUP DECISION SYSTEM · EST. 2026</p>
           </div>
 
           <div>
-            <p className="label mb-4">产品</p>
+            <p className="mb-4 text-[12px] font-medium text-ink">产品</p>
             <ul className="space-y-2.5 text-sm text-ink-2">
               <li>
                 <Link href="/new" className="link-underline">
@@ -46,7 +45,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <p className="label mb-4">关于</p>
+            <p className="mb-4 text-[12px] font-medium text-ink">关于</p>
             <ul className="space-y-2.5 text-sm text-ink-2">
               <li>
                 <Link href="/#how" className="link-underline">
@@ -67,7 +66,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <p className="label mb-4">账号</p>
+            <p className="mb-4 text-[12px] font-medium text-ink">账号</p>
             <ul className="space-y-2.5 text-sm text-ink-2">
               <li>
                 <Link href="/login" className="link-underline">
@@ -80,17 +79,12 @@ export function SiteFooter() {
                 </Link>
               </li>
             </ul>
-            <p className="mt-6 font-mono text-[10px] leading-5 text-muted">
-              Next.js 16 · Prisma
-              <br />
-              SQLite · SSE
-            </p>
           </div>
         </div>
 
         <div className="mt-14 flex flex-col gap-3 border-t border-line pt-6 text-[11px] text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 Quorum. 一次把话说定。</p>
-          <p className="font-mono tracking-wide">DESIGNED &amp; BUILT BY LIN YI</p>
+          <p>© 2026 Quorum. All rights reserved.</p>
+          <p>Designed and built by Lin Yi</p>
         </div>
       </div>
 

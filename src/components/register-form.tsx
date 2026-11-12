@@ -45,14 +45,11 @@ export function RegisterForm() {
   return (
     <div>
       <div className="mb-8">
-        <p className="label mb-3">NEW MEMBER / 注册</p>
         <h1 className="font-display text-[clamp(2.4rem,4vw,3.3rem)] leading-[1.02] tracking-[-0.03em]">
-          先有个账号，
-          <br />
-          再<span className="serif-italic">把事定下来</span>。
+          创建账号
         </h1>
         <p className="mt-3 text-sm leading-6 text-muted">
-          注册只需要一个邮箱。参与者不需要账号，组织者需要一个。
+          参与者无需注册。组织者账号用于创建与管理决策页。
         </p>
       </div>
 
@@ -124,7 +121,7 @@ export function RegisterForm() {
                 />
               ))}
             </div>
-            <span className="font-mono text-[9px] text-muted">
+            <span className="text-[11px] text-muted">
               {strength === 0 ? "至少 8 位" : strength === 1 ? "偏短" : strength === 2 ? "可以" : "很好"}
             </span>
           </div>
@@ -132,23 +129,23 @@ export function RegisterForm() {
 
         <button type="submit" disabled={loading} className="btn btn-primary w-full">
           {loading ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={15} />}
-          {loading ? "正在创建…" : "创建账号并开始"}
+          {loading ? "正在创建…" : "创建账号"}
         </button>
       </form>
 
       <div className="mt-6 border border-line bg-surface p-4">
-        <p className="label mb-2 text-[9px]">注册之后</p>
-        <ul className="space-y-1.5 text-[12px] leading-5 text-muted">
-          <li>· 建卡、发链接、看实时结果</li>
-          <li>· 管理参与者与支付状态，导出 CSV</li>
-          <li>· 随时关闭投票，把结果锁住</li>
+        <p className="text-[12px] font-medium text-ink">账号权限</p>
+        <ul className="mt-2 space-y-1.5 text-[12px] leading-5 text-muted">
+          <li>创建与分享决策页</li>
+          <li>查看投票、参与者与支付状态</li>
+          <li>关闭投票并导出 CSV</li>
         </ul>
       </div>
 
       <p className="mt-6 text-center text-[13px] text-muted">
         已经有账号？
         <Link href="/login" className="ml-1 text-ink underline decoration-line-strong underline-offset-4 hover:decoration-ink">
-          直接登录
+          登录
         </Link>
       </p>
     </div>

@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 import { deadlineState, initials } from "@/lib/format";
-import { categoryShort } from "@/lib/types";
 
 export function Avatar({
   name,
@@ -44,7 +43,7 @@ export function AvatarStack({ names, max = 5 }: { names: string[]; max?: number 
         </span>
       ))}
       {rest > 0 && (
-        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-line-strong bg-paper font-mono text-[9px] text-muted ring-2 ring-surface">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-line-strong bg-paper font-mono text-[10px] text-muted ring-2 ring-surface">
           +{rest}
         </span>
       )}
@@ -87,38 +86,26 @@ export function StatusPill({
 }
 
 export function SectionHeading({
-  index,
-  eyebrow,
   title,
   intro,
   action,
   dark = false,
 }: {
-  index: string;
-  eyebrow: string;
   title: ReactNode;
   intro?: ReactNode;
   action?: { href: string; label: string };
   dark?: boolean;
 }) {
   return (
-    <div className="reveal mb-12 grid gap-6 border-b pb-6 md:mb-16 md:grid-cols-[1fr_auto] md:items-end"
+    <div
+      className="reveal mb-12 grid gap-6 border-b pb-6 md:mb-16 md:grid-cols-[1fr_auto] md:items-end"
       style={{ borderColor: dark ? "rgba(244,241,232,0.2)" : undefined }}
     >
-      <div>
-        <div className="mb-5 flex items-center gap-3">
-          <span className={`font-mono text-[10px] ${dark ? "text-paper/50" : "text-muted"}`}>
-            {index}
-          </span>
-          <span className={`h-px w-8 ${dark ? "bg-paper/30" : "bg-line-strong"}`} />
-          <span className={`label ${dark ? "text-paper/60" : ""}`}>{eyebrow}</span>
-        </div>
-        <h2 className="section-title max-w-[720px]">{title}</h2>
-      </div>
+      <h2 className="section-title max-w-[760px]">{title}</h2>
       <div className="md:pb-1">
         {intro && (
           <p
-            className={`max-w-[330px] text-sm leading-6 ${
+            className={`max-w-[360px] text-sm leading-6 ${
               dark ? "text-paper/60" : "text-muted"
             }`}
           >
@@ -136,14 +123,6 @@ export function SectionHeading({
         )}
       </div>
     </div>
-  );
-}
-
-export function CategoryTag({ category }: { category: string }) {
-  return (
-    <span className="font-mono text-[9px] tracking-[0.18em] opacity-60">
-      {categoryShort(category)}
-    </span>
   );
 }
 

@@ -30,27 +30,23 @@ export default async function DashboardPage() {
   }).format(new Date());
 
   const stats = [
-    { label: "决策卡", value: activities.length, suffix: "张", note: "全部由你发起" },
-    { label: "累计参与", value: totals.participants, suffix: "人次", note: "无需注册的投票者" },
-    { label: "进行中", value: totals.open, suffix: "场", note: "仍可接受投票" },
-    { label: "已确认支付", value: totals.paid, suffix: "人", note: "由你手动勾选" },
+    { label: "决策卡", value: activities.length, suffix: "张" },
+    { label: "累计参与", value: totals.participants, suffix: "人次" },
+    { label: "进行中", value: totals.open, suffix: "场" },
+    { label: "已确认支付", value: totals.paid, suffix: "人" },
   ];
 
   return (
     <div className="container-page py-10 md:py-14">
       <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
         <div>
-          <div className="mb-4 flex flex-wrap items-center gap-3">
-            <span className="label">WORKSPACE / 工作台</span>
-            <span className="h-px w-8 bg-line-strong" />
-            <span className="font-mono text-[10px] text-muted">{today}</span>
-          </div>
+          <p className="mb-4 text-[12px] text-muted">{today}</p>
           <h1 className="page-title">
             你好，{user.name.slice(0, 6)}
             <span className="serif-italic text-coral">。</span>
           </h1>
           <p className="mt-3 max-w-[520px] text-sm leading-6 text-muted">
-            这里是你发起过的所有决定。谁在等、谁投了什么、谁已经付了钱，都在下面。
+            以下是你发起的全部决策。参与者、投票与支付状态均可在此查看。
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2.5">
@@ -68,12 +64,11 @@ export default async function DashboardPage() {
       <div className="mt-10 grid grid-cols-2 gap-px overflow-hidden border border-line bg-line md:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.label} className="bg-surface p-5 md:p-6">
-            <p className="label text-[9px]">{stat.label}</p>
+            <p className="text-[12px] text-muted">{stat.label}</p>
             <p className="mt-3 flex items-baseline gap-1.5">
               <span className="font-display text-[38px] leading-none">{stat.value}</span>
               <span className="text-[11px] text-muted">{stat.suffix}</span>
             </p>
-            <p className="mt-2 text-[11px] text-muted">{stat.note}</p>
           </div>
         ))}
       </div>

@@ -73,18 +73,18 @@ const EMPTY: Draft = {
 };
 
 const STEPS = [
-  { title: "基本信息", hint: "标题、氛围、截止时间" },
-  { title: "时间与地点", hint: "把选项摆出来" },
-  { title: "补充问题", hint: "忌口、交通、人数" },
-  { title: "费用与发布", hint: "收尾，然后发链接" },
+  { title: "基本信息", hint: "标题、分类与截止时间" },
+  { title: "时间与地点", hint: "设置可选时间与地点" },
+  { title: "补充问题", hint: "添加自定义问题" },
+  { title: "费用与发布", hint: "费用、检查并发布" },
 ];
 
 const TEMPLATES = [
   {
     id: "dinner",
     label: "周末聚餐",
-    title: "周六，一起吃顿饭",
-    description: "找个有院子的地方慢慢吃、慢慢聊。时间地点都放这儿了，投完票我就订位。",
+    title: "周六聚餐",
+    description: "周六晚餐，地点暂定梧桐小院。请选择可行时间，截止后按人数订位。",
     category: "dinner",
     theme: "coral",
     fee: "168",
@@ -96,7 +96,7 @@ const TEMPLATES = [
     id: "team",
     label: "团队团建",
     title: "产品组 · 春季 Offsite",
-    description: "两天一夜，离开工位。投一下时间，我来订场地。",
+    description: "产品组春季 Offsite，两天一夜。请选择可行时间，以便预订场地与住宿。",
     category: "travel",
     theme: "ink",
     fee: "680",
@@ -107,8 +107,8 @@ const TEMPLATES = [
   {
     id: "book",
     label: "读书会",
-    title: "读书会 · 下一期读什么",
-    description: "不用读完，带着一个让你不舒服的问题来就行。",
+    title: "读书会 · 下一期书目",
+    description: "确定下一期读书会的时间与书目。请选择可行时间，并推荐一本你想读的书。",
     category: "workshop",
     theme: "lime",
     fee: "",
@@ -119,8 +119,8 @@ const TEMPLATES = [
   {
     id: "trip",
     label: "短途出行",
-    title: "周末出逃计划",
-    description: "两天一夜，离开城市。选一个时间，我们去看山。",
+    title: "周末短途出行",
+    description: "周末短途出行，两天一夜。请选择可行时间，费用按人数均摊。",
     category: "travel",
     theme: "sky",
     fee: "420",
@@ -209,13 +209,13 @@ export function CreateWizard({ userName }: { userName: string }) {
       feeNote: template.feeNote,
       deadline: nextDay(3, 21, 0),
       times: [
-        { id: uid("t"), start: nextDay(2, 17, 30), end: nextDay(2, 21, 0), note: "看完日落刚好" },
-        { id: uid("t"), start: nextDay(2, 19, 0), end: nextDay(2, 22, 0), note: "下班晚也来得及" },
-        { id: uid("t"), start: nextDay(3, 12, 0), end: nextDay(3, 15, 0), note: "午市更安静" },
+        { id: uid("t"), start: nextDay(2, 17, 30), end: nextDay(2, 21, 0), note: "" },
+        { id: uid("t"), start: nextDay(2, 19, 0), end: nextDay(2, 22, 0), note: "" },
+        { id: uid("t"), start: nextDay(3, 12, 0), end: nextDay(3, 15, 0), note: "" },
       ],
       places: [
-        { id: uid("p"), label: template.place, note: "人均适中，可以久坐" },
-        { id: uid("p"), label: "另一个备选", note: "更近，但位置不多" },
+        { id: uid("p"), label: template.place, note: "人均 ¥150–200" },
+        { id: uid("p"), label: "备选地点", note: "视人数确认" },
       ],
       locationName: template.place,
       fields: [
@@ -405,15 +405,13 @@ export function CreateWizard({ userName }: { userName: string }) {
               <ArrowLeft size={13} />
               工作台
             </Link>
-            <span className="h-px w-6 bg-line-strong" />
-            <span className="label text-[9px]">NEW DECISION / 04</span>
           </div>
-          <h1 className="page-title">建一张决策卡。</h1>
+          <h1 className="page-title">创建决策页</h1>
           <p className="mt-2 max-w-[520px] text-sm leading-6 text-muted">
-            把选项摆出来，把问题问清楚。发布之后，你只需要把链接发出去。
+            填写时间、地点与问题。发布后分享链接即可开始收集投票。
           </p>
         </div>
-        <div className="flex items-center gap-2 font-mono text-[9px] tracking-wide text-muted">
+        <div className="flex items-center gap-2 text-[11px] text-muted">
           <span className={`h-1.5 w-1.5 rounded-full ${savedAt ? "bg-acid-deep" : "bg-line-strong"}`} />
           {savedAt ? `草稿已自动保存 ${savedAt}` : "草稿会自动保存"}
         </div>
@@ -422,7 +420,7 @@ export function CreateWizard({ userName }: { userName: string }) {
       <div className="grid gap-6 lg:grid-cols-[190px_minmax(0,1fr)] xl:grid-cols-[190px_minmax(0,1fr)_340px]">
         <aside className="hidden lg:block">
           <div className="sticky top-[88px]">
-            <p className="label mb-4 text-[9px]">PROGRESS</p>
+            <p className="mb-3 text-[12px] text-muted">步骤</p>
             <ol className="space-y-1">
               {STEPS.map((item, index) => {
                 const active = index === step;
@@ -451,7 +449,7 @@ export function CreateWizard({ userName }: { userName: string }) {
                       } ${reachable ? "" : "cursor-not-allowed opacity-40"}`}
                     >
                       <span
-                        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-mono text-[9px] ${
+                        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-mono text-[10px] ${
                           done
                             ? "border-ink bg-ink text-acid"
                             : active
@@ -476,9 +474,8 @@ export function CreateWizard({ userName }: { userName: string }) {
             </ol>
 
             <div className="mt-6 border border-line bg-surface p-3">
-              <p className="label mb-2 text-[8px]">TIP</p>
               <p className="text-[11px] leading-5 text-muted">
-                时间选项建议给 2–3 个。太少没得选，太多会让人犹豫。
+                建议提供 2–3 个时间选项，便于比较。
               </p>
             </div>
           </div>
@@ -487,9 +484,9 @@ export function CreateWizard({ userName }: { userName: string }) {
         <div>
           {/* Mobile progress */}
           <div className="mb-5 lg:hidden">
-            <div className="mb-2 flex items-center justify-between font-mono text-[9px] text-muted">
+            <div className="mb-2 flex items-center justify-between text-[11px] text-muted">
               <span>
-                STEP 0{step + 1} / 04 · {STEPS[step].title}
+                步骤 {step + 1} / 4 · {STEPS[step].title}
               </span>
               <span>{Math.round(((step + 1) / 4) * 100)}%</span>
             </div>
@@ -528,7 +525,7 @@ export function CreateWizard({ userName }: { userName: string }) {
               {step === 0 && (
                 <div className="space-y-6">
                   <div>
-                    <p className="label mb-2 text-[9px]">START WITH A TEMPLATE</p>
+                    <p className="mb-2 text-[12px] text-muted">从模板开始</p>
                     <div className="flex flex-wrap gap-2">
                       {TEMPLATES.map((template) => (
                         <button
@@ -713,9 +710,7 @@ export function CreateWizard({ userName }: { userName: string }) {
                       {draft.times.map((time, index) => (
                         <div key={time.id} className="border border-line bg-paper p-3">
                           <div className="mb-2 flex items-center justify-between">
-                            <span className="font-mono text-[9px] text-muted">
-                              TIME 0{index + 1}
-                            </span>
+                            <span className="text-[11px] text-muted">时间 {index + 1}</span>
                             {draft.times.length > 1 && (
                               <button
                                 type="button"
@@ -734,7 +729,7 @@ export function CreateWizard({ userName }: { userName: string }) {
                           </div>
                           <div className="grid gap-2 sm:grid-cols-2">
                             <label className="block">
-                              <span className="mb-1 block font-mono text-[8px] tracking-wide text-muted">
+                              <span className="mb-1 block text-[11px] text-muted">
                                 开始
                               </span>
                               <input
@@ -754,7 +749,7 @@ export function CreateWizard({ userName }: { userName: string }) {
                               />
                             </label>
                             <label className="block">
-                              <span className="mb-1 block font-mono text-[8px] tracking-wide text-muted">
+                              <span className="mb-1 block text-[11px] text-muted">
                                 结束（可选）
                               </span>
                               <input
@@ -785,7 +780,7 @@ export function CreateWizard({ userName }: { userName: string }) {
                               )
                             }
                             className="field mt-2 h-8 py-0 text-[11px]"
-                            placeholder="备注（可选）：下班晚也来得及"
+                            placeholder="备注（可选）：例如 17:22 日落"
                             maxLength={120}
                           />
                         </div>
@@ -817,9 +812,7 @@ export function CreateWizard({ userName }: { userName: string }) {
                       {draft.places.map((place, index) => (
                         <div key={place.id} className="border border-line bg-paper p-3">
                           <div className="mb-2 flex items-center justify-between">
-                            <span className="font-mono text-[9px] text-muted">
-                              PLACE 0{index + 1}
-                            </span>
+                            <span className="text-[11px] text-muted">地点 {index + 1}</span>
                             {draft.places.length > 1 && (
                               <button
                                 type="button"
@@ -939,7 +932,7 @@ export function CreateWizard({ userName }: { userName: string }) {
                     <div className="border border-dashed border-line-strong bg-paper/60 px-5 py-12 text-center">
                       <p className="font-display text-xl">暂时没有问题</p>
                       <p className="mx-auto mt-2 max-w-xs text-[12px] leading-5 text-muted">
-                        不需要问什么也可以直接下一步。想收集忌口或交通方式时，再回来添加。
+                        可以留空。若需收集忌口、交通或人数，请在此添加问题。
                       </p>
                     </div>
                   ) : (
@@ -947,8 +940,8 @@ export function CreateWizard({ userName }: { userName: string }) {
                       {draft.fields.map((field, index) => (
                         <div key={field.id} className="border border-line bg-paper p-3.5">
                           <div className="mb-2 flex items-center justify-between gap-2">
-                            <span className="font-mono text-[9px] text-muted">
-                              QUESTION 0{index + 1}
+                            <span className="text-[11px] text-muted">
+                              问题 {index + 1}
                             </span>
                             <div className="flex items-center gap-3">
                               <select
@@ -963,7 +956,7 @@ export function CreateWizard({ userName }: { userName: string }) {
                                     )
                                   )
                                 }
-                                className="border border-line-strong bg-surface px-1.5 py-1 font-mono text-[9px]"
+                                className="border border-line-strong bg-surface px-1.5 py-1 text-[11px]"
                                 aria-label="问题类型"
                               >
                                 <option value="text">文本</option>
@@ -1099,8 +1092,7 @@ export function CreateWizard({ userName }: { userName: string }) {
 
                   <section className="border border-line bg-paper p-4">
                     <div className="mb-3 flex items-center justify-between border-b border-line pb-3">
-                      <p className="label text-[9px]">REVIEW / 发布前检查</p>
-                      <span className="chip text-[8px]">READY</span>
+                      <p className="text-[13px] font-medium">发布前检查</p>
                     </div>
                     <dl className="space-y-2.5 text-[12px]">
                       <div className="flex justify-between gap-4">
@@ -1156,7 +1148,7 @@ export function CreateWizard({ userName }: { userName: string }) {
                     disabled={submitting}
                     className="btn btn-primary w-full py-3"
                   >
-                    {submitting ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
+                    {submitting ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={15} />}
                     {submitting ? "正在发布…" : "发布并生成分享链接"}
                   </button>
                 </div>
@@ -1198,10 +1190,7 @@ export function CreateWizard({ userName }: { userName: string }) {
         <aside className="hidden xl:block">
           <div className="sticky top-[88px]">
             <div className="mb-3 flex items-center justify-between">
-              <p className="label text-[9px]">LIVE PREVIEW</p>
-              <span className="flex items-center gap-1.5 font-mono text-[9px] text-muted">
-                <span className="live-dot" /> 实时预览
-              </span>
+              <p className="text-[12px] text-muted">预览</p>
             </div>
 
             <CoverPoster
@@ -1218,7 +1207,7 @@ export function CreateWizard({ userName }: { userName: string }) {
             />
 
             <div className="mt-4 border border-line bg-surface p-4">
-              <p className="label mb-3 text-[9px]">这张卡里有什么</p>
+              <p className="mb-3 text-[12px] text-muted">内容概览</p>
               <div className="space-y-2 text-[11px]">
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-muted">
@@ -1248,7 +1237,7 @@ export function CreateWizard({ userName }: { userName: string }) {
             </div>
 
             <p className="mt-3 text-[10px] leading-5 text-muted">
-              封面由标题、分类和配色实时生成。发布后仍可在控制台关闭投票。
+              封面根据标题、分类与配色实时生成。
             </p>
           </div>
         </aside>

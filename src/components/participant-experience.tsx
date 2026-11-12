@@ -205,7 +205,7 @@ export function ParticipantExperience({
         deadline: snapshot.activity.deadline,
       }));
       setJustSubmitted(true);
-      setNotice("你的选择已经记录。截止前都可以回来修改。");
+      setNotice("你的选择已记录。截止前可随时修改。");
     } catch {
       setError("网络出了点问题，请重试");
     } finally {
@@ -215,7 +215,7 @@ export function ParticipantExperience({
 
   async function addSuggestion() {
     if (!suggestionText.trim()) {
-      setNotice("写点什么再提交。");
+      setNotice("请输入内容后再提交。");
       return;
     }
     setSuggestionSending(true);
@@ -251,7 +251,7 @@ export function ParticipantExperience({
 
   async function toggleSuggestion(id: string) {
     if (!hasResponded || !clientKey) {
-      setNotice("先提交你的选择，就可以附议别人的提议了。");
+      setNotice("先提交你的选择，即可附议他人的提议。");
       return;
     }
     if (locked) return;
@@ -308,12 +308,12 @@ export function ParticipantExperience({
   return (
     <div className="container-page pb-16 pt-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-[11px] text-muted">
+        <div className="flex items-center gap-2 text-[12px] text-muted">
           <Link href="/" className="hover:text-ink">
             Quorum
           </Link>
           <ChevronRight size={12} />
-          <span className="font-mono tracking-wide">PUBLIC / {activity.shareCode}</span>
+          <span className="font-mono tracking-wide">{activity.shareCode}</span>
         </div>
         <div className="flex items-center gap-2">
           <StatusPill status={activity.status} deadline={activity.deadline} />
@@ -370,7 +370,7 @@ export function ParticipantExperience({
           icon={<MapPin size={14} />}
           label="集合点"
           value={activity.location?.name || activity.location?.address || "待定"}
-          note={activity.location?.address ?? "地点在卡片里投票"}
+          note={activity.location?.address ?? "见地点选项"}
         />
       </div>
 
@@ -387,19 +387,18 @@ export function ParticipantExperience({
             <div className="border border-line bg-surface">
               <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line px-5 py-5 md:px-6">
                 <div>
-                  <p className="label mb-1.5 text-[9px]">YOUR RESPONSE / 你的选择</p>
                   <h2 className="font-display text-2xl leading-tight">
-                    {hasResponded ? "修改你的选择" : "投一票，把事定下来"}
+                    {hasResponded ? "修改你的选择" : "提交你的选择"}
                   </h2>
-                  <p className="mt-1.5 text-[11px] text-muted">
+                  <p className="mt-1.5 text-[12px] text-muted">
                     {hasResponded
-                      ? "截止之前都可以更新。改完记得再提交一次。"
-                      : "不用注册。填个名字，选好时间地点，提交即可。"}
+                      ? "截止前可随时更新，提交后立即生效。"
+                      : "无需注册。填写姓名并选择时间与地点后提交。"}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="font-display text-3xl leading-none">{activity.counts.participants}</p>
-                  <p className="label mt-1 text-[8px]">人已参与</p>
+                  <p className="mt-1 text-[11px] text-muted">人已参与</p>
                 </div>
               </div>
 
@@ -408,16 +407,16 @@ export function ParticipantExperience({
                   <div className="ticker-in mb-5 flex items-start gap-2.5 border border-ink bg-acid px-3.5 py-3">
                     <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
                     <div className="flex-1">
-                      <p className="text-[12px] font-medium">你的选择已经记录。</p>
+                      <p className="text-[12px] font-medium">你的选择已记录。</p>
                       <p className="mt-0.5 text-[11px] text-ink/70">
-                        截止前可以随时回来修改。现在可以去看看实时结果。
+                        截止前可随时修改。结果页会实时更新。
                       </p>
                     </div>
                     <Link
                       href={`/a/${activity.shareCode}/results`}
                       className="hidden shrink-0 items-center gap-1 border border-ink bg-paper px-2 py-1 text-[10px] sm:flex"
                     >
-                      看结果 <ChevronRight size={11} />
+                      查看结果 <ChevronRight size={11} />
                     </Link>
                   </div>
                 )}
@@ -428,7 +427,7 @@ export function ParticipantExperience({
                       <Pencil size={12} />
                       你已参与，当前选择「{selectedNames().join(" · ") || "未选择"}」
                     </p>
-                    <span className="font-mono text-[9px] text-muted">可修改</span>
+                    <span className="text-[11px] text-muted">可修改</span>
                   </div>
                 )}
 
@@ -439,7 +438,7 @@ export function ParticipantExperience({
                 )}
 
                 {restoring && !hasResponded && (
-                  <p className="mb-4 font-mono text-[10px] text-muted">正在检查你之前的参与记录…</p>
+                  <p className="mb-4 text-[11px] text-muted">正在读取你之前的参与记录…</p>
                 )}
 
                 <div className="mb-6">
@@ -486,8 +485,7 @@ export function ParticipantExperience({
                 {activity.fields.length > 0 && (
                   <div className="mt-7 border-t border-line pt-6">
                     <div className="mb-4">
-                      <p className="label mb-1.5 text-[9px]">A FEW MORE THINGS</p>
-                      <h3 className="font-display text-xl">还有几个小问题</h3>
+                      <h3 className="font-display text-xl">补充信息</h3>
                     </div>
                     <div className="space-y-4">
                       {activity.fields.map((field) => (
@@ -524,8 +522,8 @@ export function ParticipantExperience({
                   </button>
                   <p className="mt-2 text-center text-[10px] text-muted">
                     {hasResponded
-                      ? "截止之前都可以更新，票数会实时同步给所有人。"
-                      : "投票后会显示每个选项的票数，避免先到先得的影响。"}
+                      ? "截止前可随时更新，票数会实时同步。"
+                      : "提交后显示实时票数；截止前可随时修改。"}
                   </p>
                 </div>
               </div>
@@ -536,10 +534,9 @@ export function ParticipantExperience({
             <section className="mt-8 border-t border-line pt-8">
               <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <p className="label mb-1.5 text-[9px]">SUGGESTIONS / 提议</p>
-                  <h2 className="font-display text-[28px] leading-tight">还有别的可能？</h2>
+                  <h2 className="font-display text-[28px] leading-tight">其他提议</h2>
                   <p className="mt-1.5 text-[12px] text-muted">
-                    提一个时间或地点，或者附议你认同的那条。
+                    添加一个时间或地点，或附议你认同的提议。
                   </p>
                 </div>
                 <span className="chip">{activity.counts.suggestions} 条提议</span>
@@ -550,8 +547,8 @@ export function ParticipantExperience({
                   {suggestions.length === 0 ? (
                     <div className="border border-dashed border-line-strong bg-surface/50 px-5 py-10 text-center">
                       <MessageSquare size={20} className="mx-auto text-muted" />
-                      <p className="mt-2 font-display text-xl">还没有人提议</p>
-                      <p className="mt-1 text-[11px] text-muted">第一个说话的人，往往改变结果。</p>
+                      <p className="mt-2 font-display text-xl">暂无提议</p>
+                      <p className="mt-1 text-[11px] text-muted">你可以添加一个时间或地点。</p>
                     </div>
                   ) : (
                     suggestions.map((suggestion) => (
@@ -578,11 +575,11 @@ export function ParticipantExperience({
                         </button>
                         <div className="min-w-0 flex-1">
                           <p className="text-[13px] leading-5">{suggestion.content}</p>
-                          <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[9px] tracking-wide text-muted">
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted">
                             <span>{suggestion.authorName}</span>
                             <span>·</span>
                             <span>{relativeTime(suggestion.createdAt)}</span>
-                            <span className="chip ml-auto text-[8px]">
+                            <span className="chip ml-auto text-[10px]">
                               {suggestion.kind === "time"
                                 ? "时间"
                                 : suggestion.kind === "place"
@@ -606,13 +603,13 @@ export function ParticipantExperience({
                     </div>
                   ) : (
                     <>
-                      <p className="label mb-2 text-[9px]">MAKE A SUGGESTION</p>
+                      <p className="mb-2 text-[12px] text-muted">添加提议</p>
                       <textarea
                         value={suggestionText}
                         onChange={(event) => setSuggestionText(event.target.value)}
                         maxLength={300}
                         className="field min-h-[84px] text-[12px]"
-                        placeholder="比如：周五晚上也可以，或者换一家更近的。"
+                        placeholder="例如：周五 19:00，或更近的地点。"
                       />
                       <div className="mt-2 flex gap-2">
                         <select
@@ -642,7 +639,7 @@ export function ParticipantExperience({
                         </button>
                       </div>
                       <p className="mt-2 text-[10px] leading-5 text-muted">
-                        提交你的选择之后，就可以附议别人的提议。
+                        提交选择后即可附议他人的提议。
                       </p>
                     </>
                   )}
@@ -655,8 +652,7 @@ export function ParticipantExperience({
         <aside className="space-y-4 lg:sticky lg:top-[88px]">
           <div className="border border-line bg-surface p-5">
             <div className="flex items-center justify-between border-b border-line pb-3">
-              <p className="label text-[9px]">ABOUT THIS CARD</p>
-              <span className="live-dot" />
+              <p className="text-[12px] font-medium">决策信息</p>
             </div>
             <dl className="mt-3 space-y-3 text-[11px]">
               <div className="flex items-start justify-between gap-3">
@@ -717,24 +713,23 @@ export function ParticipantExperience({
           </div>
 
           <div className="border border-line bg-surface p-5">
-            <p className="label mb-3 text-[9px]">HOSTED BY</p>
+            <p className="mb-3 text-[12px] font-medium">发起人</p>
             <div className="flex items-center gap-3">
               <Avatar name={activity.organizer.name} size="md" />
               <div>
                 <p className="text-[13px] font-medium">{activity.organizer.name}</p>
-                <p className="font-mono text-[9px] text-muted">发起人</p>
               </div>
             </div>
           </div>
 
           <div className="border border-ink bg-ink p-5 text-paper">
             <div className="flex items-center justify-between">
-              <p className="label text-[9px] text-paper/50">LIVE RESULT</p>
+              <p className="text-[12px] font-medium text-paper/70">实时结果</p>
               <span className="live-dot" />
             </div>
-            <p className="mt-3 font-display text-2xl leading-tight">结果正在发生。</p>
+            <p className="mt-3 font-display text-2xl leading-tight">结果持续更新。</p>
             <p className="mt-1.5 text-[11px] leading-5 text-paper/55">
-              每一票都会实时进入结果页。看看现在最多人选什么。
+              每一票都会实时进入结果页。
             </p>
             <Link
               href={`/a/${activity.shareCode}/results`}
@@ -748,12 +743,12 @@ export function ParticipantExperience({
           {activity.participants.length > 0 && (
             <div className="border border-line bg-surface p-5">
               <div className="mb-3 flex items-center justify-between">
-                <p className="label text-[9px]">WHO&apos;S IN</p>
-                <span className="font-mono text-[9px] text-muted">{activity.counts.participants}</span>
+                <p className="text-[12px] font-medium">已参与</p>
+                <span className="text-[11px] text-muted">{activity.counts.participants}</span>
               </div>
               <AvatarStack names={activity.participants.map((participant) => participant.name)} max={7} />
               <p className="mt-3 text-[10px] leading-5 text-muted">
-                包括你认识的和不认识的。名单只在结果页和主控台显示。
+                名单仅在结果页与控制台显示。
               </p>
             </div>
           )}
@@ -776,7 +771,7 @@ function MetaCell({
 }) {
   return (
     <div className="bg-surface px-4 py-3.5">
-      <p className="label flex items-center gap-1.5 text-[8px]">
+      <p className="flex items-center gap-1.5 text-[11px] text-muted">
         {icon}
         {label}
       </p>
@@ -807,7 +802,7 @@ function OptionGroup({
     <section className="mt-6">
       <div className="mb-2.5 flex items-center justify-between">
         <p className="field-label mb-0">{title}</p>
-        <p className="font-mono text-[9px] text-muted">{hint}</p>
+        <p className="text-[11px] text-muted">{hint}</p>
       </div>
       <div className="space-y-2">
         {options.map((option) => {
@@ -845,7 +840,7 @@ function OptionGroup({
                 {showCounts && (
                   <div className="shrink-0 text-right">
                     <p className="font-display text-lg leading-none">{option.votes}</p>
-                    <p className="font-mono text-[8px] text-muted">{percentage}%</p>
+                    <p className="text-[10px] text-muted">{percentage}%</p>
                   </div>
                 )}
               </div>
@@ -970,10 +965,9 @@ function LockedPanel({
             <Lock size={15} />
           </span>
           <div>
-            <p className="label mb-1 text-[9px]">CLOSED / 已结束</p>
-            <h2 className="font-display text-2xl leading-tight">这次决定已经收口。</h2>
+            <h2 className="font-display text-2xl leading-tight">投票已结束。</h2>
             <p className="mt-1.5 text-[11px] text-muted">
-              不再接受新的投票，但结果仍然可以查看。
+              不再接受新的投票，结果仍可查看。
               {you ? ` 你当时选了 ${selectedNames.join(" · ") || "未选择"}。` : ""}
             </p>
           </div>
@@ -988,7 +982,7 @@ function LockedPanel({
       </div>
 
       <div className="px-5 py-5 md:px-6">
-        <p className="label mb-3 text-[9px]">FINAL TALLY</p>
+        <p className="mb-3 text-[12px] font-medium">最终结果</p>
         <div className="space-y-3">
           {activity.options.map((option) => {
             const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
@@ -997,11 +991,8 @@ function LockedPanel({
                 <div className="mb-1 flex items-center justify-between gap-3 text-[12px]">
                   <span>
                     {option.label}
-                    <span className="ml-2 font-mono text-[8px] text-muted">
-                      {option.kind === "time" ? "TIME" : "PLACE"}
-                    </span>
                   </span>
-                  <span className="shrink-0 font-mono text-[10px] text-muted">
+                  <span className="shrink-0 text-[10px] text-muted">
                     {option.votes} 票 · {percentage}%
                   </span>
                 </div>

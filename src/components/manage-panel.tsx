@@ -15,7 +15,6 @@ import {
   Lock,
   MessageSquare,
   Radio,
-  Sparkles,
   Trash2,
   Unlock,
   Users,
@@ -31,11 +30,11 @@ import { categoryLabel, type ActivityDetail, type PublicParticipant } from "@/li
 
 type Tab = "overview" | "people" | "suggestions" | "settings";
 
-const TABS: { value: Tab; label: string; note: string }[] = [
-  { value: "overview", label: "概览", note: "票数与选项" },
-  { value: "people", label: "参与者", note: "支付与回答" },
-  { value: "suggestions", label: "提议", note: "附议排行" },
-  { value: "settings", label: "设置", note: "分享与关闭" },
+const TABS: { value: Tab; label: string }[] = [
+  { value: "overview", label: "概览" },
+  { value: "people", label: "参与者" },
+  { value: "suggestions", label: "提议" },
+  { value: "settings", label: "设置" },
 ];
 
 export function ManagePanel({
@@ -259,17 +258,17 @@ export function ManagePanel({
       <div className="border-b border-line bg-surface">
         <div className="container-page py-6 md:py-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.1em] text-muted">
+            <div className="flex items-center gap-2 text-[11px] text-muted">
               <Link href="/app" className="transition-colors hover:text-ink">
-                WORKSPACE
+                工作台
               </Link>
               <span>/</span>
-              <span className="text-ink">{code}</span>
+              <span className="font-mono text-ink">{code}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className={`live-dot ${live ? "" : "opacity-30"}`} />
-              <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-                {live ? "实时同步中" : "连接已断开"}
+              <span className="text-[11px] text-muted">
+                {live ? "实时同步" : "连接已断开"}
               </span>
             </div>
           </div>
@@ -320,11 +319,11 @@ export function ManagePanel({
           <div className="ticker-in mt-6 border border-ink bg-acid p-4 md:p-5">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex items-start gap-3">
-                <Sparkles size={18} className="mt-0.5 shrink-0" />
+                <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-[13px] font-medium">决策卡已发布。</p>
+                  <p className="text-[13px] font-medium">决策页已发布。</p>
                   <p className="mt-0.5 text-[11px] text-ink/65">
-                    把链接或者分享码 {code} 发出去，朋友不用注册就能投票。
+                    分享链接或分享码 {code}，参与者无需注册即可投票。
                   </p>
                 </div>
               </div>
@@ -332,7 +331,7 @@ export function ManagePanel({
                 <ShareButton
                   url={shareUrl}
                   title={activity.title}
-                  label="分享出去"
+                  label="分享链接"
                   className="btn btn-sm border-ink bg-paper"
                 />
                 <Link href={`/a/${code}`} className="btn btn-sm border-ink bg-transparent">
@@ -352,10 +351,10 @@ export function ManagePanel({
         )}
 
         <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden border border-line bg-line md:grid-cols-4">
-          <Stat label="参与者" value={participants.length} note="无需注册" />
-          <Stat label="总票数" value={activity.counts.votes} note={activity.voteType === "single" ? "每类单选" : "可多选"} />
-          <Stat label="提议" value={activity.counts.suggestions} note="附议计入排行" />
-          <Stat label="已支付" value={paidCount} note={`${paidPercent}% 已确认`} />
+          <Stat label="参与者" value={participants.length} />
+          <Stat label="总票数" value={activity.counts.votes} />
+          <Stat label="提议" value={activity.counts.suggestions} />
+          <Stat label="已支付" value={paidCount} />
         </div>
 
         <div className="mt-8 flex items-end justify-between gap-4 border-b border-line">
@@ -380,15 +379,12 @@ export function ManagePanel({
                 >
                   {item.label}
                   {count !== null && (
-                    <span className="font-mono text-[9px] text-muted">{count}</span>
+                    <span className="text-[11px] text-muted">{count}</span>
                   )}
                 </button>
               );
             })}
           </div>
-          <p className="hidden pb-3 font-mono text-[9px] uppercase tracking-[0.12em] text-muted md:block">
-            {TABS.find((item) => item.value === tab)?.note}
-          </p>
         </div>
 
         <div className="mt-6">
@@ -396,27 +392,26 @@ export function ManagePanel({
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_310px] lg:items-start">
               <section>
                 <SectionHead
-                  label="TALLY / 实时票数"
-                  title="现在谁领先"
+                  title="投票结果"
                   note="点击任意一行可以展开投票人。"
                 />
                 <TallyBoard
                   options={activity.options}
                   voters={participants.length}
                   compact
-                  emptyHint="还没有选项。回到创建流程补上时间或地点。"
+                  emptyHint="暂无选项。"
                 />
               </section>
 
               <aside className="space-y-4">
                 <div className="border border-line bg-surface p-4">
                   <div className="flex items-center justify-between border-b border-line pb-2.5">
-                    <p className="label text-[9px]">LATEST / 最新参与</p>
+                    <p className="text-[12px] font-medium">最新参与</p>
                     <Users size={12} className="text-muted" />
                   </div>
                   {participants.length === 0 ? (
                     <p className="mt-3 text-[11px] leading-5 text-muted">
-                      还没有人参与。分享链接，等第一个名字出现。
+                      暂无参与者。
                     </p>
                   ) : (
                     <div className="mt-3 space-y-2.5">
@@ -428,7 +423,7 @@ export function ManagePanel({
                             <Avatar name={participant.name} size="xs" />
                             <div className="min-w-0 flex-1">
                               <p className="truncate text-[11px] font-medium">{participant.name}</p>
-                              <p className="font-mono text-[8px] text-muted">
+                              <p className="text-[10px] text-muted">
                                 {relativeTime(participant.createdAt)}
                               </p>
                             </div>
@@ -443,7 +438,7 @@ export function ManagePanel({
 
                 <div className="border border-ink bg-ink p-4 text-paper">
                   <div className="flex items-center justify-between">
-                    <p className="label text-[9px] text-paper/45">PAYMENT / 费用</p>
+                    <p className="text-[12px] font-medium text-paper/60">费用</p>
                     <Wallet size={12} className="text-paper/45" />
                   </div>
                   <p className="mt-3 font-display text-2xl leading-none">
@@ -455,19 +450,19 @@ export function ManagePanel({
                   <div className="mt-3 h-1.5 bg-paper/15">
                     <div className="h-full bg-acid transition-all" style={{ width: `${paidPercent}%` }} />
                   </div>
-                  <p className="mt-2 font-mono text-[9px] text-paper/55">
+                  <p className="mt-2 text-[10px] text-paper/55">
                     {paidCount} / {participants.length} 人已支付
                   </p>
                 </div>
 
                 <div className="border border-line bg-surface p-4">
                   <div className="flex items-center justify-between border-b border-line pb-2.5">
-                    <p className="label text-[9px]">QUESTIONS / 自定义问题</p>
-                    <span className="font-mono text-[9px] text-muted">{activity.fields.length}</span>
+                    <p className="text-[12px] font-medium">自定义问题</p>
+                    <span className="text-[10px] text-muted">{activity.fields.length}</span>
                   </div>
                   {activity.fields.length === 0 ? (
                     <p className="mt-3 text-[11px] leading-5 text-muted">
-                      这张卡没有额外问题。参与者的回答会出现在「参与者」标签里。
+                      暂无自定义问题。
                     </p>
                   ) : (
                     <div className="mt-3 space-y-2">
@@ -479,7 +474,7 @@ export function ManagePanel({
                         return (
                           <div key={field.id} className="flex items-start justify-between gap-3">
                             <p className="min-w-0 truncate text-[11px]">{field.label}</p>
-                            <span className="shrink-0 font-mono text-[9px] text-muted">
+                            <span className="shrink-0 text-[10px] text-muted">
                               {answered} 份
                             </span>
                           </div>
@@ -495,14 +490,13 @@ export function ManagePanel({
           {tab === "people" && (
             <section>
               <SectionHead
-                label="PEOPLE / 参与者"
-                title="谁在名单里"
-                note="支付状态只对组织者可见，参与者无法看到。"
+                title="参与者"
+                note="支付状态仅组织者可见。"
               />
 
               <div className="mb-5 border border-line bg-surface px-4 py-3.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="label text-[9px]">PAYMENT PROGRESS</p>
+                  <p className="text-[12px] font-medium">支付进度</p>
                   <p className="font-mono text-[10px] text-muted">
                     {paidCount} / {participants.length} 人 · {paidPercent}%
                   </p>
@@ -518,7 +512,7 @@ export function ManagePanel({
               {participants.length === 0 ? (
                 <div className="border border-dashed border-line-strong bg-surface/60 px-5 py-12 text-center">
                   <Users size={20} className="mx-auto text-muted" />
-                  <p className="mt-2 font-display text-2xl">还没有人参与</p>
+                  <p className="mt-2 font-display text-2xl">暂无参与者</p>
                   <p className="mt-1 text-[11px] text-muted">分享链接，朋友打开就能投票。</p>
                   <ShareButton
                     url={shareUrl}
@@ -547,14 +541,13 @@ export function ManagePanel({
           {tab === "suggestions" && (
             <section>
               <SectionHead
-                label="PROPOSALS / 提议"
-                title="大家还想要什么"
-                note="附议越多越靠前。提议的关闭在「设置」里。"
+                title="提议排行"
+                note="按附议数排序。可在「设置」中关闭提议。"
               />
               {suggestions.length === 0 ? (
                 <div className="border border-dashed border-line-strong bg-surface/60 px-5 py-12 text-center">
                   <MessageSquare size={20} className="mx-auto text-muted" />
-                  <p className="mt-2 font-display text-2xl">还没有提议</p>
+                  <p className="mt-2 font-display text-2xl">暂无提议</p>
                   <p className="mt-1 text-[11px] text-muted">
                     开放提议时，参与者可以在公开页补充时间或地点。
                   </p>
@@ -573,11 +566,11 @@ export function ManagePanel({
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="text-[13px] leading-5">{suggestion.content}</p>
-                        <p className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[9px] tracking-wide text-muted">
+                        <p className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted">
                           <span>{suggestion.authorName}</span>
                           <span>·</span>
                           <span>{relativeTime(suggestion.createdAt)}</span>
-                          <span className="chip text-[8px]">
+                          <span className="chip text-[10px]">
                             {suggestion.kind === "time"
                               ? "时间"
                               : suggestion.kind === "place"
@@ -588,7 +581,7 @@ export function ManagePanel({
                       </div>
                       <div className="shrink-0 text-right">
                         <p className="font-display text-2xl leading-none">{suggestion.votes}</p>
-                        <p className="mt-1 font-mono text-[8px] uppercase tracking-wide text-muted">
+                        <p className="mt-1 text-[10px] text-muted">
                           附议
                         </p>
                       </div>
@@ -602,13 +595,12 @@ export function ManagePanel({
           {tab === "settings" && (
             <section>
               <SectionHead
-                label="SETTINGS / 设置"
-                title="把这张卡收好"
-                note="关闭投票不会删除任何数据，结果会保留为最终状态。"
+                title="设置"
+                note="关闭投票不会删除数据，结果会保留为最终状态。"
               />
 
               <div className="grid gap-5 lg:grid-cols-2">
-                <SettingsCard title="投票与提议" hint="随时可以改变主意">
+                <SettingsCard title="投票与提议" hint="状态与截止时间">
                   <div className="flex items-center justify-between gap-4 border-b border-line py-3 first:pt-0">
                     <div>
                       <p className="text-[12px] font-medium">投票状态</p>
@@ -680,14 +672,14 @@ export function ManagePanel({
                         setDeadlineInput("");
                         void patchActivity({ deadline: null }, "deadline", "已清除截止时间。");
                       }}
-                      className="mt-2 font-mono text-[9px] text-muted underline-offset-2 hover:text-ink hover:underline"
+                      className="mt-2 text-[11px] text-muted underline-offset-2 hover:text-ink hover:underline"
                     >
                       清除截止时间
                     </button>
                   </div>
                 </SettingsCard>
 
-                <SettingsCard title="分享与数据" hint="链接永久有效">
+                <SettingsCard title="分享与数据" hint="链接、二维码与导出">
                   <div className="flex items-stretch border border-line-strong bg-paper">
                     <span className="flex min-w-0 flex-1 items-center select-all truncate px-2.5 py-2 font-mono text-[10px] text-ink-2">
                       {shareUrl}
@@ -838,7 +830,7 @@ function ParticipantRow({
         <Avatar name={participant.name} size="sm" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-medium">{participant.name}</p>
-          <p className="font-mono text-[9px] text-muted">
+          <p className="text-[10px] text-muted">
             {relativeTime(participant.createdAt)}参与
           </p>
         </div>
@@ -861,7 +853,7 @@ function ParticipantRow({
 
       <div className="grid gap-4 px-4 py-3 md:grid-cols-2">
         <div>
-          <p className="label mb-1.5 text-[8px]">选择的选项</p>
+          <p className="mb-1.5 text-[11px] text-muted">选择的选项</p>
           <div className="flex flex-wrap gap-1.5">
             {labels.length === 0 ? (
               <span className="text-[10px] text-muted">未选择</span>
@@ -875,7 +867,7 @@ function ParticipantRow({
           </div>
         </div>
         <div>
-          <p className="label mb-1.5 text-[8px]">自定义回答</p>
+          <p className="mb-1.5 text-[11px] text-muted">自定义回答</p>
           {answers.length === 0 ? (
             <span className="text-[10px] text-muted">没有填写</span>
           ) : (
@@ -894,24 +886,20 @@ function ParticipantRow({
   );
 }
 
-function Stat({ label, value, note }: { label: string; value: number; note: string }) {
+function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="bg-surface p-4 md:p-5">
-      <p className="label text-[8px]">{label}</p>
-      <p className="mt-2 font-display text-[32px] leading-none">{value}</p>
-      <p className="mt-1.5 text-[10px] text-muted">{note}</p>
+      <p className="font-display text-[32px] leading-none">{value}</p>
+      <p className="mt-2 text-[11px] text-muted">{label}</p>
     </div>
   );
 }
 
-function SectionHead({ label, title, note }: { label: string; title: string; note: string }) {
+function SectionHead({ title, note }: { title: string; note: string }) {
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-3 border-b border-line pb-4">
-      <div>
-        <p className="label mb-1.5">{label}</p>
-        <h2 className="font-display text-[26px] leading-tight">{title}</h2>
-      </div>
-      <p className="max-w-[300px] text-[10px] leading-5 text-muted">{note}</p>
+      <h2 className="font-display text-[26px] leading-tight">{title}</h2>
+      <p className="max-w-[300px] text-[11px] leading-5 text-muted">{note}</p>
     </div>
   );
 }
@@ -929,7 +917,7 @@ function SettingsCard({
     <div className="border border-line bg-surface p-5">
       <div className="mb-3 flex items-center justify-between border-b border-line pb-3">
         <p className="text-[13px] font-medium">{title}</p>
-        <p className="font-mono text-[9px] text-muted">{hint}</p>
+        <p className="text-[11px] text-muted">{hint}</p>
       </div>
       {children}
     </div>
