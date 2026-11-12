@@ -8,11 +8,17 @@ export function LogoMark({ size = 28 }: { size?: number }) {
       viewBox="0 0 32 32"
       fill="none"
       aria-hidden="true"
-      style={{ mixBlendMode: "multiply" }}
+      className="shrink-0"
     >
-      <circle cx="11" cy="11" r="9" fill="#ff5c35" fillOpacity="0.92" />
-      <circle cx="21" cy="11" r="9" fill="#a9c7ff" fillOpacity="0.92" />
-      <circle cx="16" cy="21" r="9" fill="#d9ff43" fillOpacity="0.92" />
+      <defs>
+        <linearGradient id="quorum-mark" x1="4" y1="3" x2="28" y2="29" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#6C86FF" />
+          <stop offset="1" stopColor="#3A55E6" />
+        </linearGradient>
+      </defs>
+      <rect width="32" height="32" rx="9" fill="url(#quorum-mark)" />
+      <circle cx="15" cy="15" r="6.6" stroke="#fff" strokeWidth="2.4" />
+      <path d="M19.4 19.4 24 24" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" />
     </svg>
   );
 }
@@ -27,12 +33,12 @@ export function Logo({
   return (
     <Link
       href={href}
-      className={`group inline-flex items-center gap-2.5 ${className}`}
+      className={`group inline-flex items-center gap-2 ${className}`}
       aria-label="Quorum 首页"
     >
       <LogoMark />
-      <span className="font-display text-[25px] leading-none tracking-[-0.035em] lowercase">
-        quorum
+      <span className="text-[21px] font-semibold leading-none tracking-[-0.035em]">
+        Quorum
       </span>
     </Link>
   );

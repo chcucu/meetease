@@ -131,7 +131,7 @@ export function LiveResults({
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href={`/a/${code}`}
-                className="flex items-center gap-1.5 text-[11px] text-paper/60 transition-colors hover:text-acid"
+                className="flex items-center gap-1.5 text-[11px] text-white/60 transition-colors hover:text-white"
               >
                 <ArrowLeft size={12} />
                 返回决策页
@@ -141,7 +141,7 @@ export function LiveResults({
             <div className="flex items-center gap-3">
               <span
                 className={`flex items-center gap-1.5 text-[11px] ${
-                  connection === "live" ? "text-acid" : "text-paper/45"
+                  connection === "live" ? "text-[#a9bcff]" : "text-white/45"
                 }`}
               >
                 <Radio size={11} />
@@ -151,7 +151,7 @@ export function LiveResults({
                 url={shareUrl}
                 title={`${snapshot.activity.title} · 实时结果`}
                 label="分享结果"
-                className="btn btn-sm border-paper/30 bg-transparent text-paper hover:border-acid hover:text-acid"
+                className="btn btn-sm border-white/25 bg-transparent text-white hover:border-white/50 hover:bg-white/10"
                 compact
               />
             </div>
@@ -160,18 +160,18 @@ export function LiveResults({
           <div className="mt-7 grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div>
               <div className="mb-4 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 font-mono text-[10px] tracking-[0.1em] text-paper/70">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.06] px-2.5 py-1 text-[10.5px] font-medium text-white/80">
                   {snapshot.activity.shareCode}
                 </span>
-                <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 text-[10px] text-paper/70">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.06] px-2.5 py-1 text-[10.5px] text-white/70">
                   {closed ? "已结束" : "进行中"}
                 </span>
                 {snapshot.activity.deadline && (
-                  <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 text-[10px] text-paper/70">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.06] px-2.5 py-1 text-[10.5px] text-white/70">
                     {formatDateTime(snapshot.activity.deadline, snapshot.activity.timeZone)} 截止
                   </span>
                 )}
-                <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 text-[10px] text-paper/70">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.06] px-2.5 py-1 text-[10.5px] text-white/70">
                   {timeZoneLabel(snapshot.activity.timeZone)}
                 </span>
               </div>
@@ -208,7 +208,7 @@ export function LiveResults({
           </div>
 
           {closed && (
-            <div className="mt-7 flex flex-wrap items-center gap-2.5 border border-acid/40 bg-acid/10 px-3.5 py-2.5 text-[11px] text-acid">
+            <div className="mt-7 flex flex-wrap items-center gap-2.5 rounded-lg border border-[#a9bcff]/30 bg-[#a9bcff]/10 px-3.5 py-2.5 text-[11px] text-[#a9bcff]">
               <Lock size={13} />
               投票已结束，以下为最终结果。
             </div>
@@ -258,21 +258,21 @@ export function LiveResults({
             </div>
 
             {suggestions.length === 0 ? (
-              <div className="border border-dashed border-line-strong bg-surface/60 px-5 py-10 text-center">
+              <div className="rounded-xl border border-dashed border-line-strong bg-surface px-5 py-10 text-center">
                 <MessageSquare size={18} className="mx-auto text-muted" />
-                <p className="mt-2 font-display text-xl">暂无提议</p>
+                <p className="mt-2 text-lg font-semibold tracking-[-0.02em]">暂无提议</p>
                 <p className="mt-1 text-[11px] text-muted">
                   可回到决策页添加时间或地点。
                 </p>
               </div>
             ) : (
-              <div className="border border-line bg-surface">
+              <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-[var(--shadow-soft)]">
                 {suggestions.map((suggestion, index) => (
                   <div
                     key={suggestion.id}
                     className="flex items-start gap-4 border-b border-line px-4 py-3.5 last:border-b-0"
                   >
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center border border-line-strong bg-paper text-[10px] text-muted">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-line bg-paper text-[10px] text-muted">
                       {index + 1}
                     </span>
                     <div className="min-w-0 flex-1">
@@ -286,9 +286,9 @@ export function LiveResults({
                             : "其他"}
                       </p>
                     </div>
-                    <div className="flex shrink-0 items-center gap-1.5 border border-line-strong bg-paper px-2 py-1.5">
-                      <Trophy size={11} className={index === 0 ? "text-coral" : "text-muted"} />
-                      <span className="font-mono text-[10px]">{suggestion.votes}</span>
+                    <div className="flex shrink-0 items-center gap-1.5 rounded-lg border border-line bg-paper px-2 py-1.5">
+                      <Trophy size={11} className={index === 0 ? "text-brand" : "text-muted"} />
+                      <span className="text-[10px] tabular-nums">{suggestion.votes}</span>
                     </div>
                   </div>
                 ))}
@@ -299,7 +299,7 @@ export function LiveResults({
 
         <aside className="space-y-4 lg:sticky lg:top-[86px]">
           {isOwner && (
-            <div className="border border-ink bg-surface shadow-[4px_4px_0_rgba(23,23,20,0.92)]">
+            <div className="rounded-xl border border-line bg-surface shadow-[var(--shadow-soft)]">
               <div className="flex items-center justify-between border-b border-line px-4 py-3">
                 <p className="text-[12px] font-medium">组织者</p>
                 <Settings2 size={12} className="text-muted" />
@@ -340,7 +340,7 @@ export function LiveResults({
             </div>
           )}
 
-          <div className="border border-line bg-surface p-4">
+          <div className="rounded-xl border border-line bg-surface p-4 shadow-[var(--shadow-soft)]">
             <div className="flex items-center justify-between border-b border-line pb-3">
               <p className="text-[12px] font-medium">分享</p>
               <span className="live-dot" />
@@ -348,21 +348,21 @@ export function LiveResults({
             <p className="mt-3 text-[12px] leading-5 text-muted">
               参与者无需注册，打开链接即可投票。
             </p>
-            <div className="mt-3 flex items-stretch border border-line-strong bg-paper">
-              <span className="flex flex-1 items-center select-all px-2.5 py-2 font-mono text-[11px] text-ink-2">
+            <div className="mt-3 flex items-stretch overflow-hidden rounded-lg border border-line-strong bg-paper">
+              <span className="flex flex-1 items-center select-all px-2.5 py-2 text-[11px] text-ink-2">
                 /a/{code}
               </span>
               <ShareButton
                 url={shareUrl}
                 title={snapshot.activity.title}
                 label="分享"
-                className="flex shrink-0 items-center gap-1.5 border-l border-line-strong px-3 text-xs transition-colors hover:bg-acid-soft"
+                className="flex shrink-0 items-center gap-1.5 border-l border-line px-3 text-xs text-brand transition-colors hover:bg-brand-soft"
                 compact
               />
             </div>
             <Link
               href={`/a/${code}`}
-              className="mt-3 flex items-center justify-between border border-line bg-paper px-3 py-2 text-[11px] transition-colors hover:border-ink"
+              className="mt-3 flex items-center justify-between rounded-lg border border-line bg-paper px-3 py-2 text-[11px] transition-colors hover:border-line-strong"
             >
               打开参与页
               <ArrowUpRight size={12} />
@@ -370,7 +370,7 @@ export function LiveResults({
           </div>
 
           {snapshot.options.some((option) => option.kind === "time" && option.startsAt) && (
-            <div className="border border-line bg-surface p-4">
+            <div className="rounded-xl border border-line bg-surface p-4 shadow-[var(--shadow-soft)]">
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-[12px] font-medium">日程</p>
                 <span className="text-[11px] text-muted">{timeZoneLabel(snapshot.activity.timeZone)}</span>
@@ -386,7 +386,7 @@ export function LiveResults({
             </div>
           )}
 
-          <div className="border border-line bg-surface p-4">
+          <div className="rounded-xl border border-line bg-surface p-4 shadow-[var(--shadow-soft)]">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-[12px] font-medium">已参与</p>
               <span className="text-[11px] text-muted">{voters}</span>
@@ -415,7 +415,7 @@ export function LiveResults({
             )}
           </div>
 
-          <div className="border border-line bg-paper-deep/60 p-4">
+          <div className="rounded-xl border border-line bg-paper-deep/60 p-4">
             <div className="flex items-center gap-2">
               <Users size={12} className="text-muted" />
               <p className="text-[12px] font-medium">投票规则</p>
@@ -430,7 +430,7 @@ export function LiveResults({
       <section className="border-t border-line">
         <div className="container-page flex flex-col items-start justify-between gap-4 py-8 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
-            <span className="font-display text-2xl lowercase">quorum</span>
+            <span className="text-xl font-semibold tracking-[-0.03em]">Quorum</span>
             <StatusPill status={snapshot.activity.status} deadline={snapshot.activity.deadline} />
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -452,7 +452,7 @@ function BigStat({ value, label }: { value: number; label: string }) {
   return (
     <div>
       <p className="font-display text-[clamp(2rem,3.4vw,3rem)] leading-none">{value}</p>
-      <p className="mt-1.5 text-[11px] text-paper/45">{label}</p>
+      <p className="mt-1.5 text-[11px] text-white/45">{label}</p>
     </div>
   );
 }

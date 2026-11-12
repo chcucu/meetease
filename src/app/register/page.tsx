@@ -8,7 +8,7 @@ export default function RegisterPage() {
     <AuthLayout
       asideTitle={
         <>
-          从一次<span className="text-acid">决策</span>，
+          从一次<span className="text-[#a9bcff]">决策</span>，
           <br />
           开始。
         </>

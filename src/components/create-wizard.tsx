@@ -443,18 +443,18 @@ export function CreateWizard({ userName }: { userName: string }) {
                       }}
                       className={`flex w-full items-start gap-3 border-l-2 px-3 py-3 text-left transition-colors ${
                         active
-                          ? "border-ink bg-surface"
+                          ? "border-brand bg-surface"
                           : done
-                            ? "border-acid-deep/60 hover:bg-surface/60"
+                            ? "border-brand/40 hover:bg-surface/60"
                             : "border-line hover:bg-surface/40"
                       } ${reachable ? "" : "cursor-not-allowed opacity-40"}`}
                     >
                       <span
-                        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-mono text-[10px] ${
+                        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] ${
                           done
-                            ? "border-ink bg-ink text-acid"
+                            ? "border-brand bg-brand text-white"
                             : active
-                              ? "border-ink bg-acid text-ink"
+                              ? "border-brand bg-brand-soft text-brand"
                               : "border-line-strong text-muted"
                         }`}
                       >
@@ -491,18 +491,18 @@ export function CreateWizard({ userName }: { userName: string }) {
               </span>
               <span>{Math.round(((step + 1) / 4) * 100)}%</span>
             </div>
-            <div className="h-1 bg-line">
+            <div className="h-1 overflow-hidden rounded-full bg-line">
               <div
-                className="h-full bg-ink transition-all duration-300"
+                className="h-full rounded-full bg-brand transition-all duration-300"
                 style={{ width: `${((step + 1) / 4) * 100}%` }}
               />
             </div>
           </div>
 
-          <div className="border border-line bg-surface">
+          <div className="rounded-xl border border-line bg-surface shadow-[var(--shadow-soft)]">
             <div className="border-b border-line px-5 py-5 md:px-7">
               <div className="flex items-center gap-3">
-                <span className="flex h-7 w-7 items-center justify-center border border-ink bg-acid font-mono text-[10px]">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-[11px] font-medium text-white">
                   {step + 1}
                 </span>
                 <div>
@@ -516,7 +516,7 @@ export function CreateWizard({ userName }: { userName: string }) {
               {error && (
                 <div
                   role="alert"
-                  className="mb-5 flex items-start gap-2 border border-coral bg-coral-soft px-3 py-2.5 text-[12px] leading-5"
+                  className="mb-5 flex items-start gap-2 rounded-lg border border-coral/30 bg-coral-soft px-3 py-2.5 text-[12px] leading-5"
                 >
                   <AlertCircle size={14} className="mt-0.5 shrink-0 text-coral" />
                   {error}
@@ -533,7 +533,7 @@ export function CreateWizard({ userName }: { userName: string }) {
                           key={template.id}
                           type="button"
                           onClick={() => applyTemplate(template)}
-                          className="flex items-center gap-1.5 border border-line-strong bg-paper px-2.5 py-1.5 text-[11px] transition-colors hover:border-ink hover:bg-acid-soft"
+                          className="flex items-center gap-1.5 rounded-lg border border-line-strong bg-paper px-2.5 py-1.5 text-[11px] transition-colors hover:border-line-strong hover:bg-brand-soft"
                         >
                           <Sparkles size={11} />
                           {template.label}
@@ -559,7 +559,7 @@ export function CreateWizard({ userName }: { userName: string }) {
                     />
                     <div className="mt-1.5 flex justify-between text-[10px] text-muted">
                       <span>短一点，具体一点。</span>
-                      <span className="font-mono">{draft.title.length}/80</span>
+                      <span className="tabular-nums">{draft.title.length}/80</span>
                     </div>
                   </div>
 
@@ -585,10 +585,10 @@ export function CreateWizard({ userName }: { userName: string }) {
                           key={category.value}
                           type="button"
                           onClick={() => update("category", category.value)}
-                          className={`border px-3 py-1.5 text-[12px] transition-colors ${
+                          className={`rounded-lg border px-3 py-1.5 text-[12px] transition-colors ${
                             draft.category === category.value
-                              ? "border-ink bg-ink text-paper"
-                              : "border-line-strong bg-paper text-ink-2 hover:border-ink"
+                              ? "border-brand bg-brand text-white"
+                              : "border-line-strong bg-paper text-ink-2 hover:border-brand/50"
                           }`}
                         >
                           {category.label}
@@ -605,14 +605,14 @@ export function CreateWizard({ userName }: { userName: string }) {
                           key={theme.value}
                           type="button"
                           onClick={() => update("theme", theme.value)}
-                          className={`flex items-center gap-2 border px-2 py-1.5 text-[11px] transition-colors ${
+                          className={`flex items-center gap-2 rounded-lg border px-2 py-1.5 text-[11px] transition-colors ${
                             draft.theme === theme.value
-                              ? "border-ink bg-paper"
-                              : "border-line bg-paper/50 hover:border-ink"
+                              ? "border-brand bg-brand-soft"
+                              : "border-line bg-paper/50 hover:border-brand/40"
                           }`}
                         >
                           <span
-                            className="h-4 w-4 border border-ink/20"
+                            className="h-4 w-4 rounded border border-black/10"
                             style={{ background: theme.swatch }}
                           />
                           {theme.label}
@@ -1133,7 +1133,7 @@ export function CreateWizard({ userName }: { userName: string }) {
                     </dl>
                   </section>
 
-                  <div className="flex items-start gap-2.5 border border-acid-deep/50 bg-acid-soft px-3.5 py-3">
+                  <div className="flex items-start gap-2.5 rounded-lg border border-brand/20 bg-brand-soft px-3.5 py-3">
                     <Check size={15} className="mt-0.5 shrink-0" />
                     <div>
                       <p className="text-[12px] font-medium">发布后会发生什么</p>
@@ -1214,25 +1214,25 @@ export function CreateWizard({ userName }: { userName: string }) {
                   <span className="flex items-center gap-1.5 text-muted">
                     <CalendarDays size={11} /> 时间选项
                   </span>
-                  <span className="font-mono">{validTimes.length}</span>
+                  <span className="tabular-nums">{validTimes.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-muted">
                     <MapPin size={11} /> 地点选项
                   </span>
-                  <span className="font-mono">{validPlaces.length}</span>
+                  <span className="tabular-nums">{validPlaces.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-muted">
                     <MessageSquare size={11} /> 自定义问题
                   </span>
-                  <span className="font-mono">{draft.fields.length}</span>
+                  <span className="tabular-nums">{draft.fields.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-muted">
                     <Wallet size={11} /> 人均费用
                   </span>
-                  <span className="font-mono">{previewFee !== null ? `¥${previewFee}` : "免费"}</span>
+                  <span className="tabular-nums">{previewFee !== null ? `¥${previewFee}` : "免费"}</span>
                 </div>
               </div>
             </div>

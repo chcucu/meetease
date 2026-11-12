@@ -43,7 +43,7 @@ export default async function DashboardPage() {
           <p className="mb-4 text-[12px] text-muted">{today}</p>
           <h1 className="page-title">
             你好，{user.name.slice(0, 6)}
-            <span className="serif-italic text-coral">。</span>
+            <span className="text-brand">。</span>
           </h1>
           <p className="mt-3 max-w-[520px] text-sm leading-6 text-muted">
             以下是你发起的全部决策。参与者、投票与支付状态均可在此查看。
@@ -61,7 +61,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="mt-10 grid grid-cols-2 gap-px overflow-hidden border border-line bg-line md:grid-cols-4">
+      <div className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.label} className="bg-surface p-5 md:p-6">
             <p className="text-[12px] text-muted">{stat.label}</p>

@@ -27,7 +27,7 @@ export function AppShell({ user, children }: { user: AuthUser; children: React.R
 
   return (
     <div className="min-h-screen bg-paper">
-      <header className="sticky top-0 z-50 border-b border-line bg-paper/90 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-line bg-surface/85 backdrop-blur-xl">
         <div className="container-page flex h-[64px] items-center justify-between gap-6">
           <div className="flex items-center gap-5">
             <Logo />
@@ -41,8 +41,8 @@ export function AppShell({ user, children }: { user: AuthUser; children: React.R
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-[13px] transition-colors ${
-                    active ? "bg-ink text-paper" : "text-ink-2 hover:bg-paper-deep"
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] transition-colors ${
+                    active ? "bg-ink text-white" : "text-ink-2 hover:bg-paper"
                   }`}
                 >
                   <link.icon size={13} />
@@ -66,11 +66,11 @@ export function AppShell({ user, children }: { user: AuthUser; children: React.R
             <button
               type="button"
               onClick={() => setOpen((value) => !value)}
-              className="flex items-center gap-2 rounded-full border border-line-strong bg-surface py-1 pl-1 pr-2.5 transition-colors hover:border-ink"
+              className="flex items-center gap-2 rounded-full border border-line bg-surface py-1 pl-1 pr-2.5 transition-colors hover:border-line-strong"
               aria-expanded={open}
               aria-label="账号菜单"
             >
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink font-mono text-[10px] text-paper">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand text-[10px] text-white">
                 {user.name.slice(0, 1)}
               </span>
               <span className="max-w-[72px] truncate text-xs">{user.name}</span>
@@ -79,14 +79,14 @@ export function AppShell({ user, children }: { user: AuthUser; children: React.R
         </div>
 
         {open && (
-          <div className="absolute right-4 top-[calc(100%+6px)] w-60 border border-line bg-surface p-2 shadow-[4px_4px_0_rgba(23,23,20,0.9)] sm:right-[max(1rem,calc((100%-1280px)/2+3.25rem))]">
+          <div className="absolute right-4 top-[calc(100%+8px)] w-60 rounded-xl border border-line bg-surface p-1.5 shadow-[var(--shadow-lift)] sm:right-[max(1rem,calc((100%-1200px)/2+2.5rem))]">
             <p className="px-2 pb-1.5 pt-1 text-[11px] text-muted">
               {user.email}
             </p>
-            <Link href="/app" className="block rounded-sm px-2 py-2 text-sm hover:bg-acid-soft">
+            <Link href="/app" className="block rounded-lg px-2.5 py-2 text-sm hover:bg-paper">
               工作台
             </Link>
-            <Link href="/new" className="block rounded-sm px-2 py-2 text-sm hover:bg-acid-soft">
+            <Link href="/new" className="block rounded-lg px-2.5 py-2 text-sm hover:bg-paper">
               新建决策
             </Link>
             <button

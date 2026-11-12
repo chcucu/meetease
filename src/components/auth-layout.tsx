@@ -35,17 +35,17 @@ export function AuthLayout({
         </div>
       </div>
 
-      <aside className="section-ink relative hidden flex-col justify-between overflow-hidden border-l border-ink p-10 lg:flex">
-        <div className="dotted-grid pointer-events-none absolute inset-0 opacity-40" aria-hidden="true" />
+      <aside className="section-ink relative hidden flex-col justify-between overflow-hidden border-l border-white/10 p-10 lg:flex">
+        <div className="dotted-grid pointer-events-none absolute inset-0 opacity-25" aria-hidden="true" />
         <div
-          className="pointer-events-none absolute -right-24 -top-24 h-[380px] w-[380px] rounded-full bg-acid/20 blur-3xl"
+          className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] rounded-full bg-brand/30 blur-3xl"
           aria-hidden="true"
         />
 
         <div className="relative flex items-center justify-start">
           <span className="flex items-center gap-2">
             <span className="live-dot" />
-            <span className="text-[12px] text-paper/60">实时同步</span>
+            <span className="text-[12px] text-white/60">实时同步</span>
           </span>
         </div>
 
@@ -53,9 +53,9 @@ export function AuthLayout({
           <h2 className="max-w-[420px] font-display text-[clamp(2.2rem,3.6vw,3.6rem)] leading-[1.02] tracking-[-0.03em]">
             {asideTitle}
           </h2>
-          <p className="mt-5 max-w-[360px] text-sm leading-6 text-paper/55">{asideBody}</p>
+          <p className="mt-5 max-w-[360px] text-sm leading-6 text-white/55">{asideBody}</p>
 
-          <div className="mt-10 max-w-[400px] border border-paper/20 bg-paper p-4 text-ink shadow-[5px_5px_0_rgba(217,255,67,0.85)]">
+          <div className="mt-10 max-w-[400px] rounded-2xl border border-white/10 bg-surface p-5 text-ink shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
             <div className="flex items-start justify-between border-b border-line pb-3">
               <div>
                 <p className="font-display text-lg leading-tight">周六，去城外吃一顿</p>
@@ -74,11 +74,11 @@ export function AuthLayout({
                 <div key={row.label}>
                   <div className="mb-1 flex justify-between text-[10px]">
                     <span>{row.label}</span>
-                    <span className="font-mono text-muted">{row.count}</span>
+                    <span className="text-muted tabular-nums">{row.count}</span>
                   </div>
-                  <div className="h-2 bg-paper-deep">
+                  <div className="h-2 overflow-hidden rounded-full bg-paper-deep">
                     <div
-                      className={`h-full ${index === 0 ? "bg-coral" : "bg-ink/20"}`}
+                      className={`h-full rounded-full ${index === 0 ? "bg-brand" : "bg-brand/25"}`}
                       style={{ width: row.width }}
                     />
                   </div>
@@ -92,10 +92,10 @@ export function AuthLayout({
           </div>
         </div>
 
-        <div className="relative grid grid-cols-3 gap-4 border-t border-paper/15 pt-5">
+        <div className="relative grid grid-cols-3 gap-4 border-t border-white/15 pt-5">
           {["无需注册", "实时结果", "CSV 导出"].map((item) => (
-            <div key={item} className="flex items-center gap-2 text-[12px] text-paper/65">
-              <Check size={12} className="text-acid" />
+            <div key={item} className="flex items-center gap-2 text-[12px] text-white/65">
+              <Check size={12} className="text-[#a9bcff]" />
               {item}
             </div>
           ))}

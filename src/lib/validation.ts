@@ -96,6 +96,7 @@ export const respondSchema = z.object({
       z.union([z.string().max(500), z.array(z.string().max(80)).max(12)])
     )
     .default({}),
+  turnstileToken: z.string().max(2048).optional(),
 });
 
 export const suggestionSchema = z.object({
@@ -103,6 +104,7 @@ export const suggestionSchema = z.object({
   authorName: z.string().trim().min(1).max(30).default("匿名"),
   kind: z.enum(["time", "place", "other"]).default("other"),
   clientKey: z.string().min(8).max(64).optional(),
+  turnstileToken: z.string().max(2048).optional(),
 });
 
 export const updateActivitySchema = z.object({

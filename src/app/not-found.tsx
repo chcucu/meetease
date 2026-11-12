@@ -11,7 +11,7 @@ export default function NotFound() {
         <div className="container-page relative py-20">
           <div className="grid gap-10 lg:grid-cols-[auto_1fr] lg:items-end">
             <p className="font-display text-[clamp(7rem,20vw,16rem)] leading-[0.8] tracking-[-0.06em]">
-              4<span className="serif-italic text-coral">0</span>4
+              4<span className="text-brand">0</span>4
             </p>
             <div className="max-w-lg lg:pb-4">
               <h1 className="font-display text-[clamp(2rem,4.4vw,3.4rem)] leading-[1.02] tracking-[-0.03em]">

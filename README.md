@@ -59,6 +59,44 @@ npm run dev
 - 进程内 pub/sub 负责广播，每 10 秒与数据库对账，避免多实例或重启造成状态漂移
 - 20 秒心跳，客户端断线后由 `EventSource` 自动重连
 
+**公开 API**
+
+`GET /api/v1/activities/{shareCode}` 返回只读聚合结果，适合大屏、机器人与内部工具。
+
+```bash
+curl https://quorum.tenyearmc.top/api/v1/activities/DINNER
+```
+
+```json
+{
+  "ok": true,
+  "activity": {
+    "shareCode": "DINNER",
+    "title": "周六，去城外吃一顿",
+    "status": "open",
+    "voteType": "single",
+    "timeZone": "Asia/Shanghai",
+    "deadline": "2026-11-14T04:00:00.000Z",
+    "createdAt": "2026-11-10T09:12:00.000Z"
+  },
+  "counts": { "participants": 9, "votes": 8, "suggestions": 3 },
+  "options": [
+    { "id": "opt_1", "kind": "time", "label": "11月14日 周六 17:30", "votes": 5 }
+  ],
+  "meta": { "generatedAt": "2026-11-12T12:00:00.000Z", "cacheSeconds": 60, "privacy": "aggregate-only" }
+}
+```
+
+- 只返回计数与选项票数，不包含姓名、联系方式或自定义回答
+- 支持 CORS，`Cache-Control` 60 秒，单 IP 每分钟 60 次
+- `OPTIONS` 预检直接返回 204
+
+**人机验证与限流**
+
+- 参与者提交与提议支持 Cloudflare Turnstile；配置 `TURNSTILE_SECRET_KEY` 后强制校验，未配置时自动跳过
+- 提交按 IP 限制每分钟 12 次，提议 6 次，公开 API 60 次；超出返回 `429` 与 `Retry-After`
+- 前端在每次提交后重置 Turnstile token，避免复用
+
 ---
 
 ## 技术栈
@@ -71,7 +109,8 @@ npm run dev
 | 校验 | Zod v4 |
 | 认证 | Session：scrypt 密码哈希、数据库 session、HttpOnly Cookie |
 | 实时 | Server-Sent Events |
-| 图标 / 二维码 | lucide-react / qrcode.react |
+| 验证 | Cloudflare Turnstile（可选）+ 进程内限流 |
+| 图标 / 二维码 | lucide-react / qrcode.react（按需加载） |
 
 ---
 
@@ -99,9 +138,11 @@ npm run dev
 
 ### 6. 视觉系统
 
-- 暖纸底色、酸柠绿与珊瑚红；Instrument Serif / Geist / JetBrains Mono 三层字体
-- 封面由 CSS 色板、SVG 几何图案与 Q 水印生成，无外部图片依赖
+- 冷白底 `#F7F8FA`、主色 `#4D6BFE`、墨色 `#0F1115`；统一使用 Geist 与 Geist Mono，移除装饰性衬线
+- 10–12px 圆角、细边框与轻阴影；封面由 CSS 渐变与 SVG 几何图案生成，无外部图片依赖
+- 提交成功使用居中卡片与描线勾选动画，2.4 秒自动消散，`role="status"` 播报
 - 支持 `prefers-reduced-motion` 降级与打印样式
+- 仅保留一个正文字体家族；二维码在打开分享面板时动态加载，减少首屏体积
 
 ---
 
@@ -135,6 +176,8 @@ prisma/
 ## 边界
 
 - SQLite 与进程内 pub/sub 适用于单实例演示；多实例部署需将广播层替换为 Redis，数据库切换为 Postgres。
+- 限流与缓存均为进程内实现，多实例部署需迁移到共享存储（Redis / Cloudflare KV）。
+- Turnstile 默认可关闭；生产环境建议配置密钥，并在 Cloudflare 侧开启 WAF 与 Bot Fight Mode。
 - 参与者身份依赖 localStorage 中的 `clientKey`，清除浏览器数据后会被视为新参与者。这是免注册的取舍。
 - 未接入邮件或短信通知，分享依赖链接与二维码。
 

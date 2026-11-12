@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import { fail, ok, readBody } from "@/lib/api";
 import { prisma } from "@/lib/db";
 import { publish } from "@/lib/realtime";
+import { clientIp, rateLimit, tooManyRequests } from "@/lib/rate-limit";
+import { verifyTurnstile } from "@/lib/turnstile";
 import { suggestionSchema } from "@/lib/validation";
 
 type Context = { params: Promise<{ code: string }> };
@@ -10,6 +12,13 @@ export async function POST(request: NextRequest, context: Context) {
   const { code } = await context.params;
   const data = await readBody(request, suggestionSchema);
   if (data instanceof Response) return data;
+
+  const ip = clientIp(request);
+  const limited = rateLimit(`suggest:${ip}`, 6, 60_000);
+  if (!limited.allowed) return tooManyRequests(limited.retryAfter);
+
+  const captcha = await verifyTurnstile(data.turnstileToken, ip);
+  if (!captcha.ok) return fail(captcha.error, 403);
 
   const activity = await prisma.activity.findUnique({
     where: { shareCode: code.toUpperCase() },

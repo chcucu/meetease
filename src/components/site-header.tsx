@@ -8,9 +8,10 @@ import { useAuth } from "./auth-provider";
 import { Logo } from "./logo";
 
 const NAV = [
+  { href: "/#features", label: "产品能力" },
   { href: "/#how", label: "工作原理" },
-  { href: "/#features", label: "能力" },
   { href: "/#live", label: "实时结果" },
+  { href: "/#api", label: "开放 API" },
   { href: "/a/DINNER", label: "示例" },
 ];
 
@@ -21,11 +22,11 @@ export function SiteHeader() {
   const open = openPath === pathname;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-paper/88 backdrop-blur-md">
-      <div className="container-page flex h-[66px] items-center justify-between gap-6">
-        <div className="flex items-center gap-10">
+    <header className="sticky top-0 z-50 border-b border-line/80 bg-surface/85 backdrop-blur-xl">
+      <div className="container-page flex h-16 items-center justify-between gap-6">
+        <div className="flex items-center gap-9">
           <Logo />
-          <nav className="hidden items-center gap-7 lg:flex" aria-label="主导航">
+          <nav className="hidden items-center gap-6 lg:flex" aria-label="主导航">
             {NAV.map((item) => (
               <Link
                 key={item.href}
@@ -40,39 +41,37 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-3 md:flex">
           {loading ? (
-            <div className="h-8 w-24 animate-pulse rounded-sm bg-paper-deep" />
+            <div className="h-8 w-24 animate-pulse rounded-lg bg-paper-deep" />
           ) : user ? (
             <>
               <Link href="/app" className="btn btn-ghost btn-sm">
                 工作台
               </Link>
               <details className="group relative">
-                <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-line-strong bg-surface py-1 pl-1 pr-2.5 transition-colors hover:border-ink [&::-webkit-details-marker]:hidden">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink font-mono text-[10px] text-paper">
+                <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-line bg-surface py-1 pl-1 pr-2.5 transition-colors hover:border-line-strong [&::-webkit-details-marker]:hidden">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand text-[10px] font-medium text-white">
                     {user.name.slice(0, 1)}
                   </span>
                   <span className="max-w-[80px] truncate text-xs">{user.name}</span>
                 </summary>
-                <div className="absolute right-0 top-[calc(100%+8px)] w-52 border border-line bg-surface p-2 shadow-[4px_4px_0_rgba(23,23,20,0.9)]">
-                  <p className="px-2 pb-2 pt-1 font-mono text-[10px] tracking-wide text-muted">
-                    {user.email}
-                  </p>
+                <div className="absolute right-0 top-[calc(100%+8px)] w-56 rounded-xl border border-line bg-surface p-1.5 shadow-[var(--shadow-lift)]">
+                  <p className="px-2.5 py-2 text-[11px] text-muted">{user.email}</p>
                   <Link
                     href="/app"
-                    className="block rounded-sm px-2 py-2 text-sm transition-colors hover:bg-acid-soft"
+                    className="block rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-paper"
                   >
                     我的工作台
                   </Link>
                   <Link
                     href="/new"
-                    className="block rounded-sm px-2 py-2 text-sm transition-colors hover:bg-acid-soft"
+                    className="block rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-paper"
                   >
                     发起新决策
                   </Link>
                   <button
                     type="button"
                     onClick={() => void logout()}
-                    className="mt-1 block w-full border-t border-line px-2 py-2 text-left text-sm text-muted transition-colors hover:text-coral"
+                    className="mt-1 block w-full border-t border-line px-2.5 py-2 text-left text-sm text-muted transition-colors hover:text-coral"
                   >
                     退出登录
                   </button>
@@ -86,7 +85,7 @@ export function SiteHeader() {
               </Link>
               <Link href="/register" className="btn btn-primary btn-sm">
                 创建决策
-                <ArrowUpRight size={14} strokeWidth={2} />
+                <ArrowUpRight size={13} strokeWidth={2} />
               </Link>
             </>
           )}
@@ -94,7 +93,7 @@ export function SiteHeader() {
 
         <button
           type="button"
-          className="flex h-9 w-9 items-center justify-center border border-line-strong bg-surface md:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-surface md:hidden"
           onClick={() => setOpenPath(open ? null : pathname)}
           aria-expanded={open}
           aria-label="打开菜单"
@@ -104,8 +103,8 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <div className="border-t border-line bg-paper px-5 py-5 md:hidden">
-          <nav className="flex flex-col gap-1" aria-label="移动端导航">
+        <div className="border-t border-line bg-surface px-5 py-5 md:hidden">
+          <nav className="flex flex-col" aria-label="移动端导航">
             {NAV.map((item) => (
               <Link
                 key={item.href}
@@ -116,7 +115,7 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
-          <div className="mt-4 flex items-center gap-3">
+          <div className="mt-4 flex items-center gap-2.5">
             {user ? (
               <>
                 <Link href="/app" className="btn btn-ghost flex-1">

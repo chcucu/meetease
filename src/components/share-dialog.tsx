@@ -1,8 +1,18 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { QRCodeSVG } from "qrcode.react";
 import { Check, Copy, Share2, X } from "lucide-react";
+
+const QRCodeSVG = dynamic(
+  () => import("qrcode.react").then((mod) => mod.QRCodeSVG),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[148px] w-[148px] animate-pulse rounded-lg bg-paper-deep" />
+    ),
+  }
+);
 
 export function ShareButton({
   url,
@@ -70,24 +80,25 @@ export function ShareButton({
 
       {open && (
         <div
-          className="fixed inset-0 z-[90] flex items-end justify-center bg-ink/45 p-0 backdrop-blur-[3px] sm:items-center sm:p-6"
+          className="fixed inset-0 z-[90] flex items-end justify-center bg-ink/40 p-0 backdrop-blur-[2px] sm:items-center sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-label="分享活动"
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-lg border border-ink bg-surface shadow-[6px_6px_0_#171714]"
+            className="overlay-fade w-full max-w-lg rounded-t-2xl border border-line bg-surface shadow-[0_24px_64px_rgba(16,24,40,0.22)] sm:rounded-2xl"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-start justify-between border-b border-line px-5 py-4">
               <div>
-                <h3 className="font-display text-2xl leading-tight">分享决策页</h3>
+                <h3 className="text-lg font-semibold tracking-[-0.02em]">分享决策页</h3>
+                <p className="mt-0.5 text-[11.5px] text-muted">扫码或复制链接，即刻邀请参与者。</p>
               </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="flex h-8 w-8 items-center justify-center border border-line-strong transition-colors hover:bg-paper-deep"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-line transition-colors hover:bg-paper"
                 aria-label="关闭"
               >
                 <X size={15} />
@@ -95,38 +106,43 @@ export function ShareButton({
             </div>
 
             <div className="grid gap-5 p-5 sm:grid-cols-[172px_1fr]">
-              <div className="mx-auto border border-line bg-paper p-3">
-                <QRCodeSVG value={url} size={148} bgColor="#f2efe6" fgColor="#171714" level="M" />
+              <div className="mx-auto rounded-xl border border-line bg-white p-3">
+                <QRCodeSVG value={url} size={148} bgColor="#ffffff" fgColor="#0f1115" level="M" />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium">{title}</p>
                 <p className="mt-1.5 text-xs leading-5 text-muted">
-                  参与者无需注册。扫码或打开链接，填写姓名即可投票。
+                  参与者无需注册。扫码或打开链接，填写称呼即可投票。
                 </p>
-                <div className="mt-4 flex items-stretch border border-line-strong bg-paper">
+                <div className="mt-4 flex items-stretch overflow-hidden rounded-lg border border-line-strong bg-paper">
                   <input
                     readOnly
                     value={url}
-                    className="min-w-0 flex-1 bg-transparent px-2.5 py-2 font-mono text-[11px] text-ink-2 outline-none"
+                    aria-label="分享链接"
+                    className="min-w-0 flex-1 bg-transparent px-2.5 py-2 text-[11px] text-ink-2 outline-none"
                     onFocus={(event) => event.currentTarget.select()}
                   />
                   <button
                     type="button"
                     onClick={() => void copy()}
-                    className="flex shrink-0 items-center gap-1.5 border-l border-line-strong px-3 text-xs transition-colors hover:bg-acid-soft"
+                    className="flex shrink-0 items-center gap-1.5 border-l border-line px-3 text-xs text-brand transition-colors hover:bg-brand-soft"
                   >
                     {copied ? <Check size={13} /> : <Copy size={13} />}
                     {copied ? "已复制" : "复制"}
                   </button>
                 </div>
-                <button type="button" onClick={() => void nativeShare()} className="btn btn-dark btn-sm mt-3 w-full">
+                <button
+                  type="button"
+                  onClick={() => void nativeShare()}
+                  className="btn btn-dark btn-sm mt-3 w-full"
+                >
                   <Share2 size={13} />
                   系统分享
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-t border-line bg-paper/60 px-5 py-3">
+            <div className="flex items-center justify-between rounded-b-2xl border-t border-line bg-paper/60 px-5 py-3">
               <p className="text-[11px] text-muted">
                 分享码 {url.split("/").pop()?.toUpperCase()}
               </p>
