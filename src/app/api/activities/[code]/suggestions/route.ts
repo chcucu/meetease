@@ -3,7 +3,7 @@ import { fail, ok, readBody } from "@/lib/api";
 import { prisma } from "@/lib/db";
 import { publish } from "@/lib/realtime";
 import { clientIp, rateLimit, tooManyRequests } from "@/lib/rate-limit";
-import { verifyTurnstile } from "@/lib/turnstile";
+import { verifySlider } from "@/lib/slider-captcha";
 import { suggestionSchema } from "@/lib/validation";
 
 type Context = { params: Promise<{ code: string }> };
@@ -17,8 +17,8 @@ export async function POST(request: NextRequest, context: Context) {
   const limited = rateLimit(`suggest:${ip}`, 6, 60_000);
   if (!limited.allowed) return tooManyRequests(limited.retryAfter);
 
-  const captcha = await verifyTurnstile(data.turnstileToken, ip);
-  if (!captcha.ok) return fail(captcha.error, 403);
+  const captcha = await verifySlider(data.sliderToken, data.sliderX, ip);
+  if (!captcha.ok) return fail(captcha.error ?? "人机验证未通过，请重新验证", 403);
 
   const activity = await prisma.activity.findUnique({
     where: { shareCode: code.toUpperCase() },

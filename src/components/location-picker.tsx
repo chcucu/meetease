@@ -11,6 +11,7 @@ export type LocationPoint = { lat: number; lng: number };
 export type LocationPickerProps = {
   value: LocationPoint | null;
   onChange: (next: (LocationPoint & { address?: string }) | null) => void;
+  /** 保留以兼容调用方；地图不再自动反查地址。 */
   onAddress?: (address: string) => void;
   height?: number;
 };
@@ -18,7 +19,10 @@ export type LocationPickerProps = {
 const DEFAULT_CENTER: LocationPoint = { lat: 31.2304, lng: 121.4737 };
 const DEFAULT_ZOOM = 12;
 const SELECTED_ZOOM = 15;
-const MAX_ZOOM = 19;
+const MAX_ZOOM = 18;
+
+const TILE_URL =
+  "https://webrd0{s}.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}";
 
 const MARKER_HTML =
   '<span style="display:block;width:18px;height:18px;border:2px solid #171714;background:#d9ff43;border-radius:4px;box-shadow:0 0 0 3px rgba(23,23,20,0.12);"></span>';
@@ -27,25 +31,9 @@ function roundCoordinate(value: number) {
   return Math.round(value * 1e6) / 1e6;
 }
 
-async function reverseGeocode(lat: number, lng: number, signal: AbortSignal) {
-  const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat.toFixed(
-    5
-  )}&lon=${lng.toFixed(5)}&accept-language=zh-CN`;
-  const response = await fetch(url, { signal, headers: { Accept: "application/json" } });
-  if (!response.ok) return null;
-  const data: unknown = await response.json();
-  if (!data || typeof data !== "object") return null;
-  const record = data as { display_name?: unknown; name?: unknown };
-  const displayName = typeof record.display_name === "string" ? record.display_name.trim() : "";
-  if (displayName) return displayName;
-  const name = typeof record.name === "string" ? record.name.trim() : "";
-  return name || null;
-}
-
 export function LocationPicker({
   value,
   onChange,
-  onAddress,
   height = 260,
 }: LocationPickerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -54,12 +42,9 @@ export function LocationPicker({
   const leafletRef = useRef<LeafletModule | null>(null);
   const valueRef = useRef<LocationPoint | null>(value);
   const onChangeRef = useRef(onChange);
-  const onAddressRef = useRef(onAddress);
   const selectRef = useRef<(lat: number, lng: number) => void>(() => {});
-  const geocodeAbortRef = useRef<AbortController | null>(null);
   const [locating, setLocating] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
-  const [resolvedAddress, setResolvedAddress] = useState<string | null>(null);
 
   useEffect(() => {
     valueRef.current = value;
@@ -67,7 +52,6 @@ export function LocationPicker({
 
   useEffect(() => {
     onChangeRef.current = onChange;
-    onAddressRef.current = onAddress;
   });
 
   const syncMarker = useCallback((lat: number, lng: number) => {
@@ -96,26 +80,7 @@ export function LocationPicker({
       const nextLat = roundCoordinate(lat);
       const nextLng = roundCoordinate(lng);
       setHint(null);
-      setResolvedAddress(null);
       onChangeRef.current({ lat: nextLat, lng: nextLng });
-
-      geocodeAbortRef.current?.abort();
-      const controller = new AbortController();
-      geocodeAbortRef.current = controller;
-      void (async () => {
-        try {
-          const address = await reverseGeocode(nextLat, nextLng, controller.signal);
-          if (controller.signal.aborted) return;
-          if (address) {
-            setResolvedAddress(address);
-            onAddressRef.current?.(address);
-          }
-        } catch {
-          if (!controller.signal.aborted) {
-            setHint("地址解析失败，可手动填写地址。");
-          }
-        }
-      })();
     };
   });
 
@@ -138,10 +103,10 @@ export function LocationPicker({
       });
 
       leaflet
-        .tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        .tileLayer(TILE_URL, {
+          subdomains: ["1", "2", "3", "4"],
           maxZoom: MAX_ZOOM,
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> 贡献者',
+          attribution: "&copy; 高德地图",
         })
         .addTo(map);
 
@@ -156,7 +121,6 @@ export function LocationPicker({
 
     return () => {
       cancelled = true;
-      geocodeAbortRef.current?.abort();
       markerRef.current?.remove();
       markerRef.current = null;
       mapRef.current?.remove();
@@ -219,10 +183,8 @@ export function LocationPicker({
   }
 
   function clear() {
-    geocodeAbortRef.current?.abort();
     markerRef.current?.remove();
     markerRef.current = null;
-    setResolvedAddress(null);
     setHint(null);
     onChangeRef.current(null);
   }
@@ -237,11 +199,16 @@ export function LocationPicker({
         role="region"
       />
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-2.5 py-2">
-        <p className="font-mono text-[10px] tracking-[0.08em] text-muted">
-          {value
-            ? `已选择 ${value.lat.toFixed(4)}, ${value.lng.toFixed(4)}`
-            : "点击地图落点，或使用当前位置"}
-        </p>
+        <div className="min-w-0">
+          <p className="font-mono text-[10px] tracking-[0.08em] text-muted">
+            {value
+              ? `已选择 ${value.lat.toFixed(4)}, ${value.lng.toFixed(4)}`
+              : "点击地图落点，或使用当前位置"}
+          </p>
+          <p className="mt-0.5 font-mono text-[9px] tracking-[0.06em] text-muted">
+            地图仅记录坐标，地址请手动填写
+          </p>
+        </div>
         <div className="flex items-center gap-1.5">
           <button
             type="button"
@@ -265,11 +232,6 @@ export function LocationPicker({
       {hint && (
         <p className="border-t border-line px-2.5 py-1.5 text-[10px] leading-4 text-coral">
           {hint}
-        </p>
-      )}
-      {!hint && resolvedAddress && (
-        <p className="border-t border-line px-2.5 py-1.5 text-[10px] leading-4 text-muted">
-          地址：{resolvedAddress}
         </p>
       )}
     </div>

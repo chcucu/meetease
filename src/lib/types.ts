@@ -40,7 +40,12 @@ export type PublicOption = {
   lat: number | null;
   lng: number | null;
   votes: number;
+  vetoes: number;
+  score: number;
+  rankAvg: number | null;
+  rankCount: number;
   voterNames: string[];
+  vetoerNames: string[];
 };
 
 export type PublicField = {
@@ -70,6 +75,11 @@ export type PublicParticipant = {
   paid?: boolean;
   paidAt?: string | null;
   optionIds?: string[];
+  vetoOptionIds?: string[];
+  rankedOptionIds?: string[];
+  weight?: number;
+  condition?: string | null;
+  conditionOptionId?: string | null;
   answers?: Record<string, string | string[]>;
 };
 
@@ -83,6 +93,7 @@ export type ActivityCounts = {
 export type ActivitySummary = {
   id: string;
   shareCode: string;
+  joinCode: string | null;
   title: string;
   description: string;
   category: string;
@@ -99,6 +110,22 @@ export type ActivitySummary = {
   counts: ActivityCounts;
 };
 
+export type Agreement = {
+  /** 0–100, null when nobody voted for this kind. */
+  time: number | null;
+  place: number | null;
+};
+
+export type TieBreak = {
+  optionIds: string[];
+  until: string | null;
+};
+
+export type RankedWinners = {
+  time: string | null;
+  place: string | null;
+};
+
 export type ActivityDetail = ActivitySummary & {
   organizer: { name: string; initials: string };
   location: { name: string | null; address: string | null; lat: number | null; lng: number | null } | null;
@@ -107,10 +134,17 @@ export type ActivityDetail = ActivitySummary & {
   fields: PublicField[];
   suggestions: PublicSuggestion[];
   participants: PublicParticipant[];
+  consensus: Agreement;
+  rankedWinners: RankedWinners;
+  tieBreak: TieBreak | null;
   you: {
     id: string;
     name: string;
     optionIds: string[];
+    vetoOptionIds: string[];
+    rankedOptionIds: string[];
+    condition: string | null;
+    conditionOptionId: string | null;
     answers: Record<string, string | string[]>;
   } | null;
 };
@@ -119,6 +153,7 @@ export type ActivitySnapshot = {
   activity: {
     id: string;
     shareCode: string;
+    joinCode: string | null;
     title: string;
     status: "open" | "closed";
     voteType: VoteMode;
@@ -127,6 +162,9 @@ export type ActivitySnapshot = {
     feeAmount: number | null;
     feeNote: string | null;
     allowSuggestions: boolean;
+    consensus: Agreement;
+    rankedWinners: RankedWinners;
+    tieBreak: TieBreak | null;
   };
   options: PublicOption[];
   suggestions: PublicSuggestion[];

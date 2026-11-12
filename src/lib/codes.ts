@@ -14,3 +14,8 @@ export function generateShareCode(length = 6): string {
 export function randomKey(length = 18): string {
   return randomBytes(length).toString("base64url").slice(0, length);
 }
+
+export function generateJoinCode(): string {
+  const value = 1000 + (randomBytes(2).readUInt16BE(0) % 9000);
+  return String(value);
+}

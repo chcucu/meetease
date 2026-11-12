@@ -49,7 +49,7 @@ export async function GET(request: NextRequest, context: Context) {
           id: true,
           kind: true,
           label: true,
-          _count: { select: { votes: true } },
+          votes: { select: { value: true } },
         },
       },
       _count: { select: { participants: true, suggestions: true } },
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest, context: Context) {
     id: option.id,
     kind: option.kind,
     label: option.label,
-    votes: option._count.votes,
+    votes: option.votes.filter((vote) => vote.value === 1).length,
   }));
 
   return Response.json(

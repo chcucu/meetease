@@ -32,6 +32,7 @@ model Session {
 model Activity {
   id               String   @id @default(cuid())
   shareCode        String   @unique
+  joinCode         String?  @unique
   ownerId          String
   title            String
   description      String   @default("")
@@ -40,6 +41,8 @@ model Activity {
   voteType         String   @default("single") // single | multiple
   allowSuggestions Boolean  @default(true)
   deadline         DateTime?
+  tieBreakOptionIds String? // JSON array of option ids in the current runoff
+  tieBreakUntil    DateTime?
   coverTheme       String   @default("lime")
   coverImage       String?
   timeZone         String   @default("Asia/Shanghai")
@@ -111,6 +114,9 @@ model Participant {
   clientKey       String
   name            String
   answers         String? // JSON object
+  weight          Int              @default(1)
+  conditionOptionId String?
+  condition       String?
   paid            Boolean          @default(false)
   paidAt          DateTime?
   createdAt       DateTime         @default(now())
@@ -127,6 +133,8 @@ model Vote {
   id            String      @id @default(cuid())
   participantId String
   optionId      String
+  value         Int         @default(1) // 1 support | -1 veto
+  rank          Int         @default(0) // 0 = unranked
   createdAt     DateTime    @default(now())
   participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
   option        PollOption  @relation(fields: [optionId], references: [id], onDelete: Cascade)

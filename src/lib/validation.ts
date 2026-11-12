@@ -96,7 +96,12 @@ export const respondSchema = z.object({
       z.union([z.string().max(500), z.array(z.string().max(80)).max(12)])
     )
     .default({}),
-  turnstileToken: z.string().max(2048).optional(),
+  sliderToken: z.string().max(512).optional(),
+  sliderX: z.number().min(0).max(400).optional(),
+  vetoOptionIds: z.array(z.string().min(1)).max(1).default([]),
+  rankedOptionIds: z.array(z.string().min(1)).max(30).default([]),
+  condition: z.string().trim().max(120).optional(),
+  conditionOptionId: z.string().max(64).optional(),
 });
 
 export const suggestionSchema = z.object({
@@ -104,7 +109,8 @@ export const suggestionSchema = z.object({
   authorName: z.string().trim().min(1).max(30).default("匿名"),
   kind: z.enum(["time", "place", "other"]).default("other"),
   clientKey: z.string().min(8).max(64).optional(),
-  turnstileToken: z.string().max(2048).optional(),
+  sliderToken: z.string().max(512).optional(),
+  sliderX: z.number().min(0).max(400).optional(),
 });
 
 export const updateActivitySchema = z.object({
@@ -115,6 +121,11 @@ export const updateActivitySchema = z.object({
 
 export const paymentSchema = z.object({
   paid: z.boolean(),
+});
+
+export const participantUpdateSchema = z.object({
+  paid: z.boolean().optional(),
+  weight: z.number().int().min(1).max(5).optional(),
 });
 
 export const suggestionVoteSchema = z.object({

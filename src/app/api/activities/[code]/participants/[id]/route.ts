@@ -3,7 +3,7 @@ import { fail, ok, readBody } from "@/lib/api";
 import { prisma } from "@/lib/db";
 import { publish } from "@/lib/realtime";
 import { getSessionUserFromRequest } from "@/lib/session";
-import { paymentSchema } from "@/lib/validation";
+import { participantUpdateSchema } from "@/lib/validation";
 
 type Context = { params: Promise<{ code: string; id: string }> };
 
@@ -20,7 +20,7 @@ export async function PATCH(request: NextRequest, context: Context) {
     return fail("活动不存在或无权操作", 404);
   }
 
-  const data = await readBody(request, paymentSchema);
+  const data = await readBody(request, participantUpdateSchema);
   if (data instanceof Response) return data;
 
   const participant = await prisma.participant.findFirst({
@@ -29,11 +29,17 @@ export async function PATCH(request: NextRequest, context: Context) {
   });
   if (!participant) return fail("参与者不存在", 404);
 
-  await prisma.participant.update({
+  const updated = await prisma.participant.update({
     where: { id: participant.id },
-    data: { paid: data.paid, paidAt: data.paid ? new Date() : null },
+    data: {
+      ...(data.paid !== undefined
+        ? { paid: data.paid, paidAt: data.paid ? new Date() : null }
+        : {}),
+      ...(data.weight !== undefined ? { weight: data.weight } : {}),
+    },
+    select: { paid: true, weight: true },
   });
 
   publish(activity.shareCode);
-  return ok({ paid: data.paid });
+  return ok({ paid: updated.paid, weight: updated.weight });
 }

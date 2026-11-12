@@ -838,7 +838,9 @@ export function CreateWizard({ userName }: { userName: string }) {
                         <p className="field-label mb-0 flex items-center gap-1.5">
                           <MapPin size={13} /> 地点选项
                         </p>
-                        <p className="mt-1 text-[10px] text-muted">不想让大家选地点？留空即可。</p>
+                        <p className="mt-1 text-[10px] text-muted">
+                          点击地图选择坐标，地址可手动补充；不想让大家选地点？留空即可。
+                        </p>
                       </div>
                       <button
                         type="button"
@@ -955,16 +957,6 @@ export function CreateWizard({ userName }: { userName: string }) {
                                     )
                                   )
                                 }
-                                onAddress={(address) =>
-                                  setDraft((current) => ({
-                                    ...current,
-                                    places: current.places.map((item) =>
-                                      item.id === place.id && !item.label.trim()
-                                        ? { ...item, label: address.slice(0, 80) }
-                                        : item
-                                    ),
-                                  }))
-                                }
                                 height={220}
                               />
                             </div>
@@ -979,7 +971,7 @@ export function CreateWizard({ userName }: { userName: string }) {
                       <MapPin size={13} /> 集合点信息（可选）
                     </p>
                     <p className="mb-3 text-[10px] text-muted">
-                      这里填的是最终集合地点，和上面的「地点选项」不冲突。
+                      这里填的是最终集合地点，和上面的「地点选项」不冲突；点击地图选择坐标，地址可手动补充。
                     </p>
                     <div className="grid gap-2 sm:grid-cols-2">
                       <input
@@ -1022,14 +1014,6 @@ export function CreateWizard({ userName }: { userName: string }) {
                               locationLat: next ? next.lat : null,
                               locationLng: next ? next.lng : null,
                             }));
-                            setError(null);
-                          }}
-                          onAddress={(address) => {
-                            setDraft((current) =>
-                              current.locationAddress.trim()
-                                ? current
-                                : { ...current, locationAddress: address }
-                            );
                             setError(null);
                           }}
                         />

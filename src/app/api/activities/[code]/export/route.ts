@@ -57,10 +57,10 @@ export async function GET(request: NextRequest, context: Context) {
   const rows = activity.participants.map((participant) => {
     const answers = parseAnswers(participant.answers);
     const timePicks = participant.votes
-      .filter((vote) => vote.option.kind === "time")
+      .filter((vote) => vote.value === 1 && vote.option.kind === "time")
       .map((vote) => vote.option.label);
     const placePicks = participant.votes
-      .filter((vote) => vote.option.kind === "place")
+      .filter((vote) => vote.value === 1 && vote.option.kind === "place")
       .map((vote) => vote.option.label);
 
     return [

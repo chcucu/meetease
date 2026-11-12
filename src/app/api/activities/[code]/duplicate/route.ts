@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { Prisma } from "@prisma/client";
 import { fail, ok } from "@/lib/api";
 import { prisma } from "@/lib/db";
-import { generateShareCode } from "@/lib/codes";
+import { generateJoinCode, generateShareCode } from "@/lib/codes";
 import { getSessionUserFromRequest } from "@/lib/session";
 
 type Context = { params: Promise<{ code: string }> };
@@ -35,6 +35,7 @@ export async function POST(request: NextRequest, context: Context) {
       const copy = await prisma.activity.create({
         data: {
           shareCode,
+          joinCode: generateJoinCode(),
           ownerId: user.id,
           title,
           description: activity.description,

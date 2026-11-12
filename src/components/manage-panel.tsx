@@ -16,7 +16,9 @@ import {
   MessageSquare,
   Plus,
   Radio,
+  ThumbsDown,
   Trash2,
+  Trophy,
   Unlock,
   Users,
   Wallet,
@@ -30,12 +32,18 @@ import { coverPalette } from "@/lib/cover";
 import {
   formatDateTime,
   formatOptionTime,
+  isPast,
   relativeTime,
   timeZoneLabel,
   toZonedInputValue,
   zonedInputToISO,
 } from "@/lib/format";
-import { categoryLabel, type ActivityDetail, type PublicParticipant } from "@/lib/types";
+import {
+  categoryLabel,
+  type ActivityDetail,
+  type PublicOption,
+  type PublicParticipant,
+} from "@/lib/types";
 
 type Tab = "overview" | "people" | "suggestions" | "settings";
 
@@ -62,6 +70,8 @@ export function ManagePanel({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [paidBusy, setPaidBusy] = useState<string | null>(null);
+  const [weightBusy, setWeightBusy] = useState<string | null>(null);
+  const [confirmRunoff, setConfirmRunoff] = useState(false);
   const [deadlineInput, setDeadlineInput] = useState(
     toZonedInputValue(initialActivity.deadline, initialActivity.timeZone)
   );
@@ -129,6 +139,23 @@ export function ManagePanel({
     return (optionIds: string[]) =>
       optionIds.map((id) => map.get(id)).filter(Boolean) as string[];
   }, [activity.options]);
+
+  const tieGroups = useMemo(() => {
+    const groups: { kind: "time" | "place"; options: PublicOption[] }[] = [];
+    for (const kind of ["time", "place"] as const) {
+      const items = activity.options.filter((option) => option.kind === kind);
+      if (items.length < 2) continue;
+      const max = Math.max(...items.map((option) => option.score));
+      if (max <= 0) continue;
+      const tied = items.filter((option) => option.score === max);
+      if (tied.length >= 2) groups.push({ kind, options: tied });
+    }
+    return groups;
+  }, [activity.options]);
+
+  const tieBreakActive = Boolean(
+    activity.tieBreak && (!activity.tieBreak.until || !isPast(activity.tieBreak.until))
+  );
 
   async function patchActivity(body: Record<string, unknown>, key: string, message: string) {
     setBusy(key);
@@ -228,6 +255,71 @@ export function ManagePanel({
       setError("网络出了点问题，请重试");
     } finally {
       setPaidBusy(null);
+    }
+  }
+
+  async function startRunoff() {
+    setBusy("runoff");
+    setError(null);
+    try {
+      const response = await fetch(`/api/activities/${code}/runoff`, { method: "POST" });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error ?? "发起决胜轮失败");
+        return;
+      }
+      setConfirmRunoff(false);
+      const fallbackUntil = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+      setActivity((current) => ({
+        ...current,
+        tieBreak: {
+          optionIds: Array.isArray(data.tieBreak?.optionIds)
+            ? (data.tieBreak.optionIds as string[])
+            : tieGroups.flatMap((group) => group.options.map((option) => option.id)),
+          until:
+            typeof data.tieBreak?.until === "string" ? data.tieBreak.until : fallbackUntil,
+        },
+        ...(Array.isArray(data.options) ? { options: data.options } : {}),
+        ...(typeof data.deadline === "string" ? { deadline: data.deadline } : {}),
+      }));
+      router.refresh();
+      setNotice("决胜轮已开启：2 小时内只保留平票选项。");
+    } catch {
+      setError("网络出了点问题，请重试");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function setWeight(participant: PublicParticipant, weight: number) {
+    setWeightBusy(participant.id);
+    setError(null);
+    try {
+      const response = await fetch(
+        `/api/activities/${code}/participants/${participant.id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ weight }),
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error ?? "操作失败");
+        return;
+      }
+      const nextWeight = typeof data.weight === "number" ? data.weight : weight;
+      setActivity((current) => ({
+        ...current,
+        participants: current.participants.map((item) =>
+          item.id === participant.id ? { ...item, weight: nextWeight } : item
+        ),
+      }));
+      setNotice(`已把 ${participant.name} 的权重设为 ${nextWeight}。`);
+    } catch {
+      setError("网络出了点问题，请重试");
+    } finally {
+      setWeightBusy(null);
     }
   }
 
@@ -498,6 +590,64 @@ export function ManagePanel({
                   title="投票结果"
                   note="点击任意一行可以展开投票人。"
                 />
+
+                {tieGroups.length > 0 && (
+                  <div className="mb-4 border border-ink bg-surface p-4 shadow-[3px_3px_0_rgba(23,23,20,0.9)]">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <Trophy size={16} className="mt-0.5 shrink-0 text-coral" />
+                        <div>
+                          <p className="text-[13px] font-medium">出现平票</p>
+                          <p className="mt-1 text-[11px] leading-5 text-muted">
+                            {tieGroups
+                              .map(
+                                (group) =>
+                                  `${group.kind === "time" ? "时间" : "地点"}：${group.options
+                                    .map((option) => option.label)
+                                    .join(" · ")}`
+                              )
+                              .join("；")}
+                          </p>
+                          <p className="mt-1 text-[10px] text-muted">2 小时，只保留平票选项。</p>
+                        </div>
+                      </div>
+                      {tieBreakActive ? (
+                        <span className="chip border-coral text-coral">决胜轮进行中</span>
+                      ) : confirmRunoff ? (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => void startRunoff()}
+                            disabled={busy === "runoff"}
+                            className="btn btn-sm border-ink bg-coral"
+                          >
+                            {busy === "runoff" && (
+                              <Loader2 size={12} className="animate-spin" />
+                            )}
+                            确认发起
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmRunoff(false)}
+                            className="btn btn-sm border-line-strong bg-transparent"
+                          >
+                            取消
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmRunoff(true)}
+                          className="btn btn-dark btn-sm"
+                        >
+                          <Trophy size={12} />
+                          发起决胜轮
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <TallyBoard
                   options={activity.options}
                   voters={participants.length}
@@ -631,9 +781,17 @@ export function ManagePanel({
                       key={participant.id}
                       participant={participant}
                       labels={optionLabels(participant.optionIds ?? [])}
+                      vetoLabels={optionLabels(participant.vetoOptionIds ?? [])}
+                      conditionOptionLabel={
+                        participant.conditionOptionId
+                          ? optionLabels([participant.conditionOptionId])[0] ?? null
+                          : null
+                      }
                       fields={activity.fields}
                       busy={paidBusy === participant.id}
+                      weightBusy={weightBusy === participant.id}
                       onTogglePaid={() => void togglePaid(participant)}
+                      onSetWeight={(weight) => void setWeight(participant, weight)}
                     />
                   ))}
                 </div>
@@ -1014,15 +1172,23 @@ export function ManagePanel({
 function ParticipantRow({
   participant,
   labels,
+  vetoLabels,
+  conditionOptionLabel,
   fields,
   busy,
+  weightBusy,
   onTogglePaid,
+  onSetWeight,
 }: {
   participant: PublicParticipant;
   labels: string[];
+  vetoLabels: string[];
+  conditionOptionLabel: string | null;
   fields: ActivityDetail["fields"];
   busy: boolean;
+  weightBusy: boolean;
   onTogglePaid: () => void;
+  onSetWeight: (weight: number) => void;
 }) {
   const answerMap = participant.answers ?? {};
   const answers = fields
@@ -1048,6 +1214,23 @@ function ParticipantRow({
             {relativeTime(participant.createdAt)}参与
           </p>
         </div>
+        <label className="flex items-center gap-1.5 text-[10px] text-muted">
+          权重
+          <select
+            value={participant.weight ?? 1}
+            onChange={(event) => onSetWeight(Number(event.target.value))}
+            disabled={busy || weightBusy}
+            aria-label={`${participant.name} 的权重`}
+            className="field h-7 w-14 px-1.5 py-0 text-[11px]"
+          >
+            {[1, 2, 3, 4, 5].map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+          {weightBusy && <Loader2 size={11} className="animate-spin" />}
+        </label>
         <button
           type="button"
           onClick={onTogglePaid}
@@ -1065,7 +1248,19 @@ function ParticipantRow({
         </button>
       </div>
 
-      <div className="grid gap-4 px-4 py-3 md:grid-cols-2">
+      {(participant.condition || conditionOptionLabel) && (
+        <div className="flex flex-wrap items-center gap-2 border-b border-line bg-paper/60 px-4 py-2 text-[10px]">
+          <span className="text-muted">参加条件</span>
+          {participant.condition && <span>{participant.condition}</span>}
+          {conditionOptionLabel && (
+            <span className="border border-line-strong bg-surface px-1.5 py-0.5">
+              {conditionOptionLabel}
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className="grid gap-4 px-4 py-3 md:grid-cols-3">
         <div>
           <p className="mb-1.5 text-[11px] text-muted">选择的选项</p>
           <div className="flex flex-wrap gap-1.5">
@@ -1074,6 +1269,25 @@ function ParticipantRow({
             ) : (
               labels.map((label) => (
                 <span key={label} className="border border-line-strong bg-paper px-2 py-0.5 text-[10px]">
+                  {label}
+                </span>
+              ))
+            )}
+          </div>
+        </div>
+        <div>
+          <p className="mb-1.5 flex items-center gap-1 text-[11px] text-muted">
+            <ThumbsDown size={10} /> 否决
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {vetoLabels.length === 0 ? (
+              <span className="text-[10px] text-muted">无</span>
+            ) : (
+              vetoLabels.map((label) => (
+                <span
+                  key={label}
+                  className="border border-coral bg-coral-soft px-2 py-0.5 text-[10px] text-coral"
+                >
                   {label}
                 </span>
               ))

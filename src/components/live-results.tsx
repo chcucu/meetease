@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Radio,
   Settings2,
+  ThumbsDown,
   Trophy,
   Unlock,
   Users,
@@ -84,6 +85,27 @@ export function LiveResults({
     const sorted = [...snapshot.options].sort((a, b) => b.votes - a.votes);
     return sorted[0] && sorted[0].votes > 0 ? sorted[0] : null;
   }, [snapshot.options]);
+
+  const tiedIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const kind of ["time", "place"] as const) {
+      const items = snapshot.options.filter((option) => option.kind === kind);
+      if (items.length < 2) continue;
+      const max = Math.max(...items.map((option) => option.score));
+      if (max <= 0) continue;
+      const tied = items.filter((option) => option.score === max);
+      if (tied.length >= 2) tied.forEach((option) => ids.add(option.id));
+    }
+    return ids;
+  }, [snapshot.options]);
+
+  function consensusOf(kind: "time" | "place") {
+    return snapshot.activity.consensus[kind];
+  }
+
+  function formatScore(score: number) {
+    return Number.isInteger(score) ? String(score) : score.toFixed(1);
+  }
 
   const suggestions = useMemo(
     () =>
@@ -174,6 +196,12 @@ export function LiveResults({
                 <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 text-[10px] text-paper/70">
                   {timeZoneLabel(snapshot.activity.timeZone)}
                 </span>
+                <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 font-mono text-[10px] text-paper/70">
+                  共识 时间 {consensusOf("time") === null ? "暂无" : `${consensusOf("time")}%`}
+                </span>
+                <span className="inline-flex items-center gap-1.5 border border-paper/25 px-2 py-1 font-mono text-[10px] text-paper/70">
+                  地点 {consensusOf("place") === null ? "暂无" : `${consensusOf("place")}%`}
+                </span>
               </div>
 
               <h1 className="font-display text-[clamp(2.3rem,5.6vw,4.8rem)] leading-[0.96] tracking-[-0.035em]">
@@ -242,6 +270,60 @@ export function LiveResults({
             voters={voters}
             emptyHint="暂无投票。分享链接后，结果会实时显示在这里。"
           />
+
+          {snapshot.options.length > 0 && (
+            <section className="mt-4 border border-line bg-surface">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-3">
+                <p className="text-[12px] font-medium">计分明细</p>
+                <p className="text-[10px] text-muted">否决 · 加权得分 · 共识度</p>
+              </div>
+              <div>
+                {snapshot.options.map((option) => {
+                  const consensus = consensusOf(option.kind);
+                  const rankedWinner =
+                    option.id ===
+                    (option.kind === "time"
+                      ? snapshot.activity.rankedWinners.time
+                      : snapshot.activity.rankedWinners.place);
+                  return (
+                    <div
+                      key={option.id}
+                      className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line px-4 py-2.5 last:border-b-0"
+                    >
+                      <span className="min-w-0 flex-1 truncate text-[12px]">
+                        {option.label}
+                      </span>
+                      {rankedWinner && (
+                        <span className="shrink-0 border border-ink bg-acid px-1 py-0.5 font-mono text-[9px]">
+                          排序首选
+                        </span>
+                      )}
+                      {tiedIds.has(option.id) && (
+                        <span className="shrink-0 border border-coral px-1 py-0.5 font-mono text-[9px] text-coral">
+                          平票
+                        </span>
+                      )}
+                      <span className="shrink-0 font-mono text-[10px] text-muted">
+                        {option.votes} 票
+                      </span>
+                      {option.vetoes > 0 && (
+                        <span className="flex shrink-0 items-center gap-1 font-mono text-[10px] text-coral">
+                          <ThumbsDown size={9} />
+                          否决 {option.vetoes}
+                        </span>
+                      )}
+                      <span className="shrink-0 font-mono text-[10px]">
+                        得分 {formatScore(option.score)}
+                      </span>
+                      <span className="shrink-0 border border-line-strong bg-paper px-1.5 py-0.5 font-mono text-[9px] text-muted">
+                        共识 {consensus === null ? "暂无" : `${consensus}%`}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           <section className="mt-10 border-t border-line pt-8">
             <div className="mb-5 flex flex-wrap items-end justify-between gap-3">

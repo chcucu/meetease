@@ -1,7 +1,8 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./db";
-import { generateShareCode } from "./codes";
+import { generateJoinCode, generateShareCode } from "./codes";
 import { formatOptionTime } from "./format";
+import { consensus, rankedWinner } from "./tally";
 import type {
   ActivityCounts,
   ActivityDetail,
@@ -11,6 +12,7 @@ import type {
   PublicOption,
   PublicParticipant,
   PublicSuggestion,
+  TieBreak,
 } from "./types";
 import type { CreateActivityInput } from "./validation";
 
@@ -19,7 +21,14 @@ const detailInclude = Prisma.validator<Prisma.ActivityInclude>()({
   options: {
     orderBy: [{ kind: "asc" }, { sortOrder: "asc" }],
     include: {
-      votes: { select: { participant: { select: { name: true } } } },
+      votes: {
+        select: {
+          value: true,
+          rank: true,
+          participantId: true,
+          participant: { select: { name: true, weight: true } },
+        },
+      },
     },
   },
   suggestions: {
@@ -28,7 +37,7 @@ const detailInclude = Prisma.validator<Prisma.ActivityInclude>()({
   },
   participants: {
     orderBy: { createdAt: "asc" },
-    include: { votes: { select: { optionId: true } } },
+    include: { votes: { select: { optionId: true, value: true, rank: true } } },
   },
   owner: { select: { name: true } },
 });
@@ -37,7 +46,14 @@ const snapshotInclude = Prisma.validator<Prisma.ActivityInclude>()({
   options: {
     orderBy: [{ kind: "asc" }, { sortOrder: "asc" }],
     include: {
-      votes: { select: { participant: { select: { name: true } } } },
+      votes: {
+        select: {
+          value: true,
+          rank: true,
+          participantId: true,
+          participant: { select: { name: true, weight: true } },
+        },
+      },
     },
   },
   suggestions: {
@@ -46,7 +62,7 @@ const snapshotInclude = Prisma.validator<Prisma.ActivityInclude>()({
   },
   participants: {
     orderBy: { createdAt: "asc" },
-    include: { votes: { select: { optionId: true } } },
+    include: { votes: { select: { optionId: true, value: true, rank: true } } },
   },
 });
 
@@ -68,6 +84,13 @@ function parseJson<T>(value: string | null | undefined, fallback: T): T {
 function mapOption(option: DetailRecord["options"][number], timeZone: string): PublicOption {
   const startsAt = option.startsAt ? option.startsAt.toISOString() : null;
   const endsAt = option.endsAt ? option.endsAt.toISOString() : null;
+  const supports = option.votes.filter((vote) => vote.value === 1);
+  const vetoes = option.votes.filter((vote) => vote.value === -1);
+  const ranks = supports.map((vote) => vote.rank).filter((rank) => rank > 0);
+  const rankAvg = ranks.length
+    ? Math.round((ranks.reduce((sum, rank) => sum + rank, 0) / ranks.length) * 10) / 10
+    : null;
+
   return {
     id: option.id,
     kind: option.kind === "place" ? "place" : "time",
@@ -80,8 +103,16 @@ function mapOption(option: DetailRecord["options"][number], timeZone: string): P
     endsAt,
     lat: option.lat,
     lng: option.lng,
-    votes: option.votes.length,
-    voterNames: option.votes.map((v) => v.participant.name),
+    votes: supports.length,
+    vetoes: vetoes.length,
+    score: option.votes.reduce(
+      (sum, vote) => sum + vote.participant.weight * vote.value,
+      0
+    ),
+    rankAvg,
+    rankCount: ranks.length,
+    voterNames: supports.map((vote) => vote.participant.name),
+    vetoerNames: vetoes.map((vote) => vote.participant.name),
   };
 }
 
@@ -104,6 +135,10 @@ function mapParticipant(
   participant: DetailRecord["participants"][number],
   includePrivate: boolean
 ): PublicParticipant {
+  const ranked = participant.votes
+    .filter((vote) => vote.value === 1 && vote.rank > 0)
+    .sort((a, b) => a.rank - b.rank);
+
   return {
     id: participant.id,
     name: participant.name,
@@ -112,7 +147,16 @@ function mapParticipant(
       ? {
           paid: participant.paid,
           paidAt: participant.paidAt ? participant.paidAt.toISOString() : null,
-          optionIds: participant.votes.map((vote) => vote.optionId),
+          optionIds: participant.votes
+            .filter((vote) => vote.value === 1)
+            .map((vote) => vote.optionId),
+          vetoOptionIds: participant.votes
+            .filter((vote) => vote.value === -1)
+            .map((vote) => vote.optionId),
+          rankedOptionIds: ranked.map((vote) => vote.optionId),
+          weight: participant.weight,
+          condition: participant.condition,
+          conditionOptionId: participant.conditionOptionId,
           answers: parseJson<Record<string, string | string[]>>(participant.answers, {}),
         }
       : {}),
@@ -136,6 +180,7 @@ function mapSummary(activity: DetailRecord): ActivitySummary {
   return {
     id: activity.id,
     shareCode: activity.shareCode,
+    joinCode: activity.joinCode,
     title: activity.title,
     description: activity.description,
     category: activity.category,
@@ -150,10 +195,26 @@ function mapSummary(activity: DetailRecord): ActivitySummary {
     updatedAt: activity.updatedAt.toISOString(),
     ownerId: activity.ownerId,
     counts: countsFor(
-      activity.options.map((option) => ({ votes: option.votes.length })),
+      activity.options.map((option) => ({
+        votes: option.votes.filter((vote) => vote.value === 1).length,
+      })),
       activity.suggestions.length,
       activity.participants
     ),
+  };
+}
+
+function mapTieBreak(activity: {
+  tieBreakOptionIds: string | null;
+  tieBreakUntil: Date | null;
+}): TieBreak | null {
+  const optionIds = parseJson<string[]>(activity.tieBreakOptionIds, []).filter(
+    (id) => typeof id === "string" && id.length > 0
+  );
+  if (optionIds.length === 0) return null;
+  return {
+    optionIds,
+    until: activity.tieBreakUntil ? activity.tieBreakUntil.toISOString() : null,
   };
 }
 
@@ -199,11 +260,31 @@ function mapDetail(
     participants: activity.participants.map((participant) =>
       mapParticipant(participant, includePrivate)
     ),
+    consensus: {
+      time: consensus(activity.options, "time"),
+      place: consensus(activity.options, "place"),
+    },
+    rankedWinners: {
+      time: rankedWinner(activity.options, "time"),
+      place: rankedWinner(activity.options, "place"),
+    },
+    tieBreak: mapTieBreak(activity),
     you: you
       ? {
           id: you.id,
           name: you.name,
-          optionIds: you.votes.map((v) => v.optionId),
+          optionIds: you.votes
+            .filter((vote) => vote.value === 1)
+            .map((vote) => vote.optionId),
+          vetoOptionIds: you.votes
+            .filter((vote) => vote.value === -1)
+            .map((vote) => vote.optionId),
+          rankedOptionIds: you.votes
+            .filter((vote) => vote.value === 1 && vote.rank > 0)
+            .sort((a, b) => a.rank - b.rank)
+            .map((vote) => vote.optionId),
+          condition: you.condition,
+          conditionOptionId: you.conditionOptionId,
           answers: parseJson<Record<string, string | string[]>>(you.answers, {}),
         }
       : null,
@@ -249,6 +330,7 @@ function mapSnapshot(activity: SnapshotRecord): ActivitySnapshot {
     activity: {
       id: activity.id,
       shareCode: activity.shareCode,
+      joinCode: activity.joinCode,
       title: activity.title,
       status: activity.status === "closed" ? "closed" : "open",
       voteType: activity.voteType === "multiple" ? "multiple" : "single",
@@ -257,6 +339,15 @@ function mapSnapshot(activity: SnapshotRecord): ActivitySnapshot {
       feeAmount: activity.feeAmount,
       feeNote: activity.feeNote,
       allowSuggestions: activity.allowSuggestions,
+      consensus: {
+        time: consensus(activity.options, "time"),
+        place: consensus(activity.options, "place"),
+      },
+      rankedWinners: {
+        time: rankedWinner(activity.options, "time"),
+        place: rankedWinner(activity.options, "place"),
+      },
+      tieBreak: mapTieBreak(activity),
     },
     options,
     suggestions: activity.suggestions.map((s) =>
@@ -282,7 +373,7 @@ export async function getOwnerActivities(ownerId: string): Promise<ActivitySumma
     where: { ownerId },
     orderBy: { createdAt: "desc" },
     include: {
-      options: { select: { votes: { select: { id: true } } } },
+      options: { select: { votes: { select: { value: true } } } },
       participants: { select: { paid: true } },
       suggestions: { select: { id: true } },
     },
@@ -291,6 +382,7 @@ export async function getOwnerActivities(ownerId: string): Promise<ActivitySumma
   return activities.map((activity) => ({
     id: activity.id,
     shareCode: activity.shareCode,
+    joinCode: activity.joinCode,
     title: activity.title,
     description: activity.description,
     category: activity.category,
@@ -306,7 +398,10 @@ export async function getOwnerActivities(ownerId: string): Promise<ActivitySumma
     ownerId: activity.ownerId,
     counts: {
       participants: activity.participants.length,
-      votes: activity.options.reduce((sum, o) => sum + o.votes.length, 0),
+      votes: activity.options.reduce(
+        (sum, option) => sum + option.votes.filter((vote) => vote.value === 1).length,
+        0
+      ),
       suggestions: activity.suggestions.length,
       paid: activity.participants.filter((p) => p.paid).length,
     },
@@ -316,7 +411,11 @@ export async function getOwnerActivities(ownerId: string): Promise<ActivitySumma
 export async function createActivity(ownerId: string, input: CreateActivityInput) {
   for (let attempt = 0; attempt < 6; attempt++) {
     const shareCode = generateShareCode();
-    const existing = await prisma.activity.findUnique({ where: { shareCode }, select: { id: true } });
+    const joinCode = generateJoinCode();
+    const existing = await prisma.activity.findFirst({
+      where: { OR: [{ shareCode }, { joinCode }] },
+      select: { id: true },
+    });
     if (existing) continue;
 
     const timeOptions = input.options.filter((o) => o.kind === "time");
@@ -326,6 +425,7 @@ export async function createActivity(ownerId: string, input: CreateActivityInput
       return await prisma.activity.create({
         data: {
           shareCode,
+          joinCode,
           ownerId,
           title: input.title,
           description: input.description,
