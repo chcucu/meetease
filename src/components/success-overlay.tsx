@@ -65,6 +65,7 @@ export function SuccessOverlay({
 
         <button
           type="button"
+          autoFocus
           onClick={onClose}
           className="btn btn-dark btn-sm mt-5 w-full"
         >

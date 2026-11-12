@@ -9,6 +9,8 @@ import { respondSchema } from "@/lib/validation";
 
 type Context = { params: Promise<{ code: string }> };
 
+class ActivityClosedError extends Error {}
+
 function isEmpty(value: string | string[] | undefined) {
   if (value === undefined) return true;
   if (Array.isArray(value)) return value.filter((item) => item.trim()).length === 0;
@@ -84,31 +86,52 @@ export async function POST(request: NextRequest, context: Context) {
     cleanAnswers[field.id] = value;
   }
 
-  const participant = await prisma.participant.upsert({
-    where: {
-      activityId_clientKey: { activityId: activity.id, clientKey: data.clientKey },
-    },
-    create: {
-      activityId: activity.id,
-      clientKey: data.clientKey,
-      name: data.name,
-      answers: JSON.stringify(cleanAnswers),
-    },
-    update: {
-      name: data.name,
-      answers: JSON.stringify(cleanAnswers),
-    },
-    select: { id: true, name: true, paid: true, createdAt: true },
-  });
-
-  await prisma.$transaction(async (tx) => {
-    await tx.vote.deleteMany({ where: { participantId: participant.id } });
-    if (optionIds.length) {
-      await tx.vote.createMany({
-        data: optionIds.map((optionId) => ({ participantId: participant.id, optionId })),
+  const participant = await prisma
+    .$transaction(async (tx) => {
+      const current = await tx.activity.findUnique({
+        where: { id: activity.id },
+        select: { status: true, deadline: true },
       });
-    }
-  });
+      if (
+        !current ||
+        current.status !== "open" ||
+        (current.deadline && current.deadline.getTime() < Date.now())
+      ) {
+        throw new ActivityClosedError();
+      }
+
+      const saved = await tx.participant.upsert({
+        where: {
+          activityId_clientKey: { activityId: activity.id, clientKey: data.clientKey },
+        },
+        create: {
+          activityId: activity.id,
+          clientKey: data.clientKey,
+          name: data.name,
+          answers: JSON.stringify(cleanAnswers),
+        },
+        update: {
+          name: data.name,
+          answers: JSON.stringify(cleanAnswers),
+        },
+        select: { id: true, name: true, paid: true, createdAt: true },
+      });
+
+      await tx.vote.deleteMany({ where: { participantId: saved.id } });
+      if (optionIds.length) {
+        await tx.vote.createMany({
+          data: optionIds.map((optionId) => ({ participantId: saved.id, optionId })),
+        });
+      }
+
+      return saved;
+    })
+    .catch((error: unknown) => {
+      if (error instanceof ActivityClosedError) return null;
+      throw error;
+    });
+
+  if (!participant) return fail("这次活动已经结束投票了", 409);
 
   publish(activity.shareCode);
   const snapshot = await getSnapshot(activity.shareCode);

@@ -36,6 +36,7 @@ export default async function PublicActivityPage({ params }: Props) {
     <>
       <SiteHeader />
       <main className="min-h-screen">
+        <h1 className="sr-only">{activity.title}</h1>
         <ParticipantExperience
           initialActivity={activity}
           isOwner={user?.id === activity.ownerId}

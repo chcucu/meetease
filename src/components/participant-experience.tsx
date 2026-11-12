@@ -646,8 +646,11 @@ export function ParticipantExperience({
                     </div>
                   ) : (
                     <>
-                      <p className="mb-2 text-[12px] text-muted">添加提议</p>
+                      <p id="suggestion-label" className="mb-2 text-[12px] text-muted">
+                        添加提议
+                      </p>
                       <textarea
+                        aria-labelledby="suggestion-label"
                         value={suggestionText}
                         onChange={(event) => setSuggestionText(event.target.value)}
                         maxLength={300}
@@ -875,7 +878,7 @@ function OptionGroup({
         <p className="text-[11px] text-muted">{hint}</p>
       </div>
       {footnote && <p className="mb-2 text-[10px] text-muted">{footnote}</p>}
-      <div className="space-y-2">
+      <div className="space-y-2" role="group" aria-label={title}>
         {options.map((option) => {
           const isSelected = selected.includes(option.id);
           const percentage =
@@ -941,14 +944,21 @@ function FieldInput({
   onChange: (value: string | string[]) => void;
 }) {
   const stringValue = Array.isArray(value) ? "" : (value ?? "");
+  const inputId = `field-${field.id}`;
+  const labelId = `${inputId}-label`;
 
   return (
     <div>
-      <label className="field-label">
+      <label
+        htmlFor={field.type === "multi" ? undefined : inputId}
+        id={labelId}
+        className="field-label"
+      >
         {field.label} {field.required && <span className="text-coral">*</span>}
       </label>
       {field.type === "textarea" && (
         <textarea
+          id={inputId}
           value={stringValue}
           onChange={(event) => onChange(event.target.value)}
           className="field min-h-[84px]"
@@ -958,6 +968,7 @@ function FieldInput({
       )}
       {field.type === "text" && (
         <input
+          id={inputId}
           value={stringValue}
           onChange={(event) => onChange(event.target.value)}
           className="field"
@@ -967,6 +978,7 @@ function FieldInput({
       )}
       {field.type === "number" && (
         <input
+          id={inputId}
           value={stringValue}
           onChange={(event) => onChange(event.target.value)}
           inputMode="decimal"
@@ -976,6 +988,7 @@ function FieldInput({
       )}
       {field.type === "select" && (
         <select
+          id={inputId}
           value={stringValue}
           onChange={(event) => onChange(event.target.value)}
           className="field"
@@ -989,7 +1002,7 @@ function FieldInput({
         </select>
       )}
       {field.type === "multi" && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2" role="group" aria-labelledby={labelId}>
           {field.options.map((option) => {
             const values = Array.isArray(value) ? value : [];
             const active = values.includes(option);
