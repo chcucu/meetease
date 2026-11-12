@@ -15,11 +15,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!activity) return { title: "活动不存在" };
   return {
     title: activity.title,
-    description: activity.description || "查看选项并投票，结果实时汇总。",
+    description: activity.description || "来投票，帮我们把这个决定定下来。",
     robots: { index: false, follow: false },
     openGraph: {
       title: `${activity.title} · Quorum`,
-      description: activity.description || "查看选项并投票，结果实时汇总。",
+      description: activity.description || "来投票，帮我们把这个决定定下来。",
       type: "website",
     },
   };
@@ -45,10 +45,10 @@ export default async function PublicActivityPage({ params }: Props) {
         <div className="container-page flex flex-col items-start justify-between gap-3 py-7 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2">
             <LogoMark size={22} />
-            <span className="text-[17px] font-semibold tracking-[-0.03em]">Quorum</span>
+            <span className="font-display text-lg lowercase">quorum</span>
           </div>
           <p className="text-[11px] text-muted">
-            由 Quorum 提供 · DeepSeek 展示项目 ·{" "}
+            由 Quorum 提供 ·{" "}
             <Link href="/" className="link-underline text-ink">
               创建决策页
             </Link>

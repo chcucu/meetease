@@ -120,9 +120,9 @@ export function LoginForm() {
         <span className="h-px flex-1 bg-line" />
       </div>
 
-      <div className="rounded-xl border border-brand/20 bg-brand-soft/70 p-4">
+      <div className="border border-line-strong bg-acid-soft/70 p-4">
         <p className="text-[13px] font-medium">演示账号</p>
-        <p className="mt-1 text-[10.5px] leading-5 text-ink-2">
+        <p className="mt-1 font-mono text-[10px] leading-5 text-ink-2">
           demo@quorum.app · quorum123
         </p>
         <button

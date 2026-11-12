@@ -38,8 +38,8 @@ export function TallyBoard({
 
   if (options.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-line-strong bg-surface px-5 py-12 text-center">
-        <p className="text-xl font-semibold tracking-[-0.02em]">暂无选项</p>
+      <div className="border border-dashed border-line-strong bg-surface/60 px-5 py-12 text-center">
+        <p className="font-display text-2xl">暂无选项</p>
         <p className="mx-auto mt-2 max-w-sm text-[12px] leading-6 text-muted">{emptyHint}</p>
       </div>
     );
@@ -69,10 +69,8 @@ export function TallyBoard({
               return (
                 <div
                   key={option.id}
-                  className={`rounded-xl border transition-colors ${
-                    leading
-                      ? "border-brand/35 bg-brand-soft/40 shadow-[var(--shadow-soft)]"
-                      : "border-line bg-surface"
+                  className={`border bg-surface transition-colors ${
+                    leading ? "border-ink shadow-[3px_3px_0_rgba(23,23,20,0.12)]" : "border-line"
                   }`}
                 >
                   <button
@@ -94,7 +92,7 @@ export function TallyBoard({
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                             <p className="text-[13px] font-medium leading-5">{option.label}</p>
                             {leading && (
-                              <span className="inline-flex items-center rounded-full bg-brand px-1.5 py-0.5 text-[10px] font-medium text-white">
+                              <span className="inline-flex items-center border border-ink bg-acid px-1.5 py-0.5 text-[10px]">
                                 领先
                               </span>
                             )}
@@ -112,11 +110,9 @@ export function TallyBoard({
                     </div>
 
                     <div className="mt-3 flex items-center gap-3">
-                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-paper-deep">
+                      <div className="h-2 flex-1 overflow-hidden bg-paper-deep">
                         <div
-                          className={`vote-bar h-full rounded-full ${
-                            leading ? "bg-brand" : "bg-brand/30"
-                          }`}
+                          className={`vote-bar h-full ${leading ? "bg-ink" : "bg-ink/35"}`}
                           style={{ width: `${percent}%` }}
                         />
                       </div>
@@ -139,7 +135,7 @@ export function TallyBoard({
                       {option.voterNames.map((name, voterIndex) => (
                         <span
                           key={`${name}-${voterIndex}`}
-                          className="rounded-full border border-line bg-surface px-2 py-1 text-[10px]"
+                          className="border border-line-strong bg-surface px-2 py-1 text-[10px]"
                         >
                           {name}
                         </span>

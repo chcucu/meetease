@@ -355,7 +355,7 @@ export function ManagePanel({
                 工作台
               </Link>
               <span>/</span>
-              <span className="font-semibold tabular-nums text-ink">{code}</span>
+              <span className="font-mono text-ink">{code}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className={`live-dot ${live ? "" : "opacity-30"}`} />
@@ -419,7 +419,7 @@ export function ManagePanel({
 
       <div className="container-page">
         {showCreated && (
-          <div className="ticker-in mt-6 rounded-xl border border-brand/20 bg-brand-soft p-4 md:p-5">
+          <div className="ticker-in mt-6 border border-ink bg-acid p-4 md:p-5">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
@@ -435,15 +435,15 @@ export function ManagePanel({
                   url={shareUrl}
                   title={activity.title}
                   label="分享链接"
-                  className="btn btn-sm border-line bg-surface"
+                  className="btn btn-sm border-ink bg-paper"
                 />
-                <Link href={`/a/${code}`} className="btn btn-sm border-line-strong bg-transparent">
+                <Link href={`/a/${code}`} className="btn btn-sm border-ink bg-transparent">
                   打开参与页
                 </Link>
                 <button
                   type="button"
                   onClick={() => setShowCreated(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-line transition-colors hover:bg-ink hover:text-white"
+                  className="flex h-8 w-8 items-center justify-center border border-ink/30 transition-colors hover:bg-ink hover:text-acid"
                   aria-label="关闭提示"
                 >
                   <X size={14} />
@@ -476,7 +476,7 @@ export function ManagePanel({
                   onClick={() => setTab(item.value)}
                   className={`flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-[13px] transition-colors ${
                     tab === item.value
-                      ? "border-brand bg-brand-soft text-brand"
+                      ? "border-ink text-ink"
                       : "border-transparent text-muted hover:text-ink"
                   }`}
                 >
@@ -539,7 +539,7 @@ export function ManagePanel({
                   )}
                 </div>
 
-                <div className="rounded-xl border border-ink bg-ink p-4 text-white">
+                <div className="border border-ink bg-ink p-4 text-paper">
                   <div className="flex items-center justify-between">
                     <p className="text-[12px] font-medium text-paper/60">费用</p>
                     <Wallet size={12} className="text-paper/45" />
@@ -597,16 +597,16 @@ export function ManagePanel({
                 note="支付状态仅组织者可见。"
               />
 
-              <div className="mb-5 rounded-xl border border-line bg-surface px-4 py-3.5">
+              <div className="mb-5 border border-line bg-surface px-4 py-3.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-[12px] font-medium">支付进度</p>
-                  <p className="text-[10px] tabular-nums text-muted">
+                  <p className="font-mono text-[10px] text-muted">
                     {paidCount} / {participants.length} 人 · {paidPercent}%
                   </p>
                 </div>
-                <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-paper-deep">
+                <div className="mt-2.5 h-2 bg-paper-deep">
                   <div
-                    className="h-full rounded-full bg-brand transition-all"
+                    className="h-full bg-coral transition-all"
                     style={{ width: `${paidPercent}%` }}
                   />
                 </div>
@@ -661,7 +661,7 @@ export function ManagePanel({
                     <article
                       key={suggestion.id}
                       className={`flex gap-4 border p-4 ${
-                        index === 0 ? "border-brand/40 bg-surface" : "border-line bg-surface"
+                        index === 0 ? "border-ink bg-surface" : "border-line bg-surface"
                       }`}
                     >
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-line-strong bg-paper font-display text-lg">
@@ -786,14 +786,14 @@ export function ManagePanel({
                 </SettingsCard>
 
                 <SettingsCard title="分享与数据" hint="链接、二维码与导出">
-                  <div className="flex items-stretch overflow-hidden rounded-lg border border-line-strong bg-paper">
-                    <span className="flex min-w-0 flex-1 items-center select-all truncate px-2.5 py-2 text-[10.5px] text-ink-2">
+                  <div className="flex items-stretch border border-line-strong bg-paper">
+                    <span className="flex min-w-0 flex-1 items-center select-all truncate px-2.5 py-2 font-mono text-[10px] text-ink-2">
                       {shareUrl}
                     </span>
                     <button
                       type="button"
                       onClick={() => void copyLink()}
-                      className="flex shrink-0 items-center gap-1.5 border-l border-line px-3 text-[11px] text-brand transition-colors hover:bg-brand-soft"
+                      className="flex shrink-0 items-center gap-1.5 border-l border-line-strong px-3 text-[11px] transition-colors hover:bg-acid-soft"
                     >
                       {copied ? <Check size={12} /> : <Copy size={12} />}
                       {copied ? "已复制" : "复制"}
@@ -959,7 +959,7 @@ export function ManagePanel({
                           type="button"
                           onClick={() => void removeActivity()}
                           disabled={busy === "delete"}
-                          className="btn btn-sm border-coral bg-coral text-white"
+                          className="btn btn-sm border-ink bg-coral"
                         >
                           {busy === "delete" && <Loader2 size={12} className="animate-spin" />}
                           确认删除
@@ -984,8 +984,8 @@ export function ManagePanel({
       {(notice || error) && (
         <div className="fixed bottom-5 left-1/2 z-[95] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2">
           <div
-            className={`ticker-in flex items-start gap-2 rounded-lg border px-3.5 py-2.5 text-[11px] shadow-[var(--shadow-lift)] ${
-              error ? "border-coral/30 bg-coral-soft" : "border-brand/20 bg-brand-soft text-ink-2"
+            className={`ticker-in flex items-start gap-2 border px-3.5 py-2.5 text-[11px] shadow-[3px_3px_0_rgba(23,23,20,0.9)] ${
+              error ? "border-coral bg-coral-soft" : "border-ink bg-acid"
             }`}
           >
             {error ? (
@@ -1052,7 +1052,7 @@ function ParticipantRow({
           type="button"
           onClick={onTogglePaid}
           disabled={busy}
-          className={`btn btn-sm ${participant.paid ? "border-brand bg-brand text-white" : "btn-ghost"}`}
+          className={`btn btn-sm ${participant.paid ? "border-ink bg-acid" : "btn-ghost"}`}
         >
           {busy ? (
             <Loader2 size={12} className="animate-spin" />
@@ -1157,13 +1157,13 @@ function Toggle({
       aria-label={label}
       onClick={onChange}
       disabled={disabled}
-      className={`relative h-[26px] w-[46px] shrink-0 rounded-full border transition-colors ${
-        checked ? "border-brand bg-brand" : "border-line-strong bg-paper-deep"
+      className={`relative h-[26px] w-[46px] shrink-0 border transition-colors ${
+        checked ? "border-ink bg-ink" : "border-line-strong bg-paper-deep"
       } ${disabled ? "opacity-50" : ""}`}
     >
       <span
-        className={`absolute top-[3px] h-4 w-4 rounded-full transition-all ${
-          checked ? "left-[25px] bg-white" : "left-[3px] bg-surface"
+        className={`absolute top-[3px] h-4 w-4 transition-all ${
+          checked ? "left-[25px] bg-acid" : "left-[3px] bg-surface"
         }`}
       />
     </button>

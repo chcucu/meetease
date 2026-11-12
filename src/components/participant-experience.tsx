@@ -332,7 +332,7 @@ export function ParticipantExperience({
             Quorum
           </Link>
           <ChevronRight size={12} />
-          <span className="font-medium text-ink-2">{activity.shareCode}</span>
+          <span className="font-mono tracking-wide">{activity.shareCode}</span>
         </div>
         <div className="flex items-center gap-2">
           <StatusPill status={activity.status} deadline={activity.deadline} />
@@ -367,7 +367,7 @@ export function ParticipantExperience({
         />
       </div>
 
-      <div className="mt-4 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-px border-x border-b border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
         <MetaCell
           icon={<Clock3 size={14} />}
           label="截止"
@@ -421,7 +421,7 @@ export function ParticipantExperience({
               totalVotes={activity.counts.votes}
             />
           ) : (
-            <div className="rounded-xl border border-line bg-surface shadow-[var(--shadow-soft)]">
+            <div className="border border-line bg-surface">
               <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line px-5 py-5 md:px-6">
                 <div>
                   <h2 className="font-display text-2xl leading-tight">
@@ -441,7 +441,7 @@ export function ParticipantExperience({
 
               <div className="px-5 py-5 md:px-6">
                 {hasResponded && (
-                  <div className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-line bg-paper px-3.5 py-2.5">
+                  <div className="mb-5 flex items-center justify-between gap-3 border border-line bg-paper px-3.5 py-2.5">
                     <p className="flex items-center gap-2 text-[11px] text-muted">
                       <Pencil size={12} />
                       你已参与，当前选择「{selectedNames().join(" · ") || "未选择"}」
@@ -451,7 +451,7 @@ export function ParticipantExperience({
                 )}
 
                 {notice && (
-                  <div className="ticker-in mb-4 rounded-lg border border-line bg-brand-soft px-3 py-2 text-[11px] text-ink-2">
+                  <div className="mb-4 border border-line bg-acid-soft px-3 py-2 text-[11px]">
                     {notice}
                   </div>
                 )}
@@ -588,19 +588,17 @@ export function ParticipantExperience({
               <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
                 <div className="space-y-2.5">
                   {suggestions.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-line-strong bg-surface px-5 py-10 text-center">
+                    <div className="border border-dashed border-line-strong bg-surface/50 px-5 py-10 text-center">
                       <MessageSquare size={20} className="mx-auto text-muted" />
-                      <p className="mt-2 text-lg font-semibold tracking-[-0.02em]">暂无提议</p>
+                      <p className="mt-2 font-display text-xl">暂无提议</p>
                       <p className="mt-1 text-[11px] text-muted">你可以添加一个时间或地点。</p>
                     </div>
                   ) : (
                     suggestions.map((suggestion) => (
                       <article
                         key={suggestion.id}
-                        className={`flex gap-3 rounded-xl border p-3.5 transition-colors ${
-                          suggestion.upvoted
-                            ? "border-brand/40 bg-brand-soft/50"
-                            : "border-line bg-surface"
+                        className={`flex gap-3 border p-3.5 transition-colors ${
+                          suggestion.upvoted ? "border-ink bg-acid-soft/50" : "border-line bg-surface"
                         }`}
                       >
                         <button
@@ -608,15 +606,15 @@ export function ParticipantExperience({
                           onClick={() => void toggleSuggestion(suggestion.id)}
                           disabled={locked}
                           aria-pressed={suggestion.upvoted}
-                          className={`flex h-12 w-11 shrink-0 flex-col items-center justify-center rounded-lg border transition-colors ${
+                          className={`flex h-12 w-11 shrink-0 flex-col items-center justify-center border transition-colors ${
                             suggestion.upvoted
-                              ? "border-brand bg-brand text-white"
-                              : "border-line-strong bg-paper hover:border-brand/50"
+                              ? "border-ink bg-acid"
+                              : "border-line-strong bg-paper hover:border-ink"
                           } ${locked ? "cursor-not-allowed opacity-50" : ""}`}
                           title={hasResponded ? "附议这条提议" : "提交选择后可附议"}
                         >
                           <ArrowUp size={13} />
-                          <span className="text-[10px] tabular-nums">{suggestion.votes}</span>
+                          <span className="font-mono text-[10px]">{suggestion.votes}</span>
                         </button>
                         <div className="min-w-0 flex-1">
                           <p className="text-[13px] leading-5">{suggestion.content}</p>
@@ -638,7 +636,7 @@ export function ParticipantExperience({
                   )}
                 </div>
 
-                <div className="rounded-xl border border-line bg-surface p-4 shadow-[var(--shadow-soft)]">
+                <div className="border border-line bg-surface p-4">
                   {locked ? (
                     <div className="text-[12px] text-muted">
                       <p className="flex items-center gap-1.5 font-medium text-ink">
@@ -704,7 +702,7 @@ export function ParticipantExperience({
         </div>
 
         <aside className="space-y-4 lg:sticky lg:top-[88px]">
-          <div className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow-soft)]">
+          <div className="border border-line bg-surface p-5">
             <div className="flex items-center justify-between border-b border-line pb-3">
               <p className="text-[12px] font-medium">决策信息</p>
             </div>
@@ -754,7 +752,7 @@ export function ParticipantExperience({
                 href={`https://www.openstreetmap.org/?mlat=${activity.location.lat}&mlon=${activity.location.lng}#map=15/${activity.location.lat}/${activity.location.lng}`}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-4 flex items-center gap-1.5 rounded-lg border border-line bg-paper px-3 py-2 text-[11px] transition-colors hover:border-line-strong"
+                className="mt-4 flex items-center gap-1.5 border border-line bg-paper px-3 py-2 text-[11px] transition-colors hover:border-ink"
               >
                 <MapPin size={12} />
                 在地图中打开
@@ -767,7 +765,7 @@ export function ParticipantExperience({
                 )}`}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-4 flex items-center gap-1.5 rounded-lg border border-line bg-paper px-3 py-2 text-[11px] transition-colors hover:border-line-strong"
+                className="mt-4 flex items-center gap-1.5 border border-line bg-paper px-3 py-2 text-[11px] transition-colors hover:border-ink"
               >
                 <MapPin size={12} />
                 搜索这个地点
@@ -776,7 +774,7 @@ export function ParticipantExperience({
             ))}
           </div>
 
-          <div className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow-soft)]">
+          <div className="border border-line bg-surface p-5">
             <p className="mb-3 text-[12px] font-medium">发起人</p>
             <div className="flex items-center gap-3">
               <Avatar name={activity.organizer.name} size="md" />
@@ -786,20 +784,18 @@ export function ParticipantExperience({
             </div>
           </div>
 
-          <div className="rounded-xl border border-brand/20 bg-gradient-to-br from-brand-soft to-surface p-5">
+          <div className="border border-ink bg-ink p-5 text-paper">
             <div className="flex items-center justify-between">
-              <p className="text-[12px] font-medium text-brand">实时结果</p>
+              <p className="text-[12px] font-medium text-paper/70">实时结果</p>
               <span className="live-dot" />
             </div>
-            <p className="mt-3 text-xl font-semibold leading-tight tracking-[-0.02em]">
-              结果持续更新。
-            </p>
-            <p className="mt-1.5 text-[11px] leading-5 text-muted">
+            <p className="mt-3 font-display text-2xl leading-tight">结果持续更新。</p>
+            <p className="mt-1.5 text-[11px] leading-5 text-paper/55">
               每一票都会实时进入结果页。
             </p>
             <Link
               href={`/a/${activity.shareCode}/results`}
-              className="mt-4 flex items-center justify-between rounded-lg border border-brand/20 bg-surface px-3 py-2 text-[11px] text-brand transition-colors hover:border-brand/40"
+              className="mt-4 flex items-center justify-between border border-paper/30 px-3 py-2 text-[11px] transition-colors hover:border-acid hover:text-acid"
             >
               查看实时结果
               <ChevronRight size={12} />
@@ -807,7 +803,7 @@ export function ParticipantExperience({
           </div>
 
           {activity.participants.length > 0 && (
-            <div className="rounded-xl border border-line bg-surface p-5 shadow-[var(--shadow-soft)]">
+            <div className="border border-line bg-surface p-5">
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-[12px] font-medium">已参与</p>
                 <span className="text-[11px] text-muted">{activity.counts.participants}</span>
@@ -890,17 +886,17 @@ function OptionGroup({
               type="button"
               onClick={() => onToggle(option)}
               aria-pressed={isSelected}
-              className={`relative w-full overflow-hidden rounded-lg border px-3.5 py-3 text-left transition-all duration-200 ${
+              className={`relative w-full overflow-hidden border px-3.5 py-3 text-left transition-all duration-200 ${
                 isSelected
-                  ? "border-brand/45 bg-brand-soft/60"
-                  : "border-line bg-surface hover:border-line-strong hover:bg-paper/60"
+                  ? "border-ink bg-acid-soft shadow-[2px_2px_0_#171714]"
+                  : "border-line-strong bg-paper/40 hover:border-ink hover:bg-paper"
               }`}
             >
               <div className="relative flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
                   <span
                     className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
-                      isSelected ? "border-brand bg-brand text-white" : "border-line-strong bg-surface"
+                      isSelected ? "border-ink bg-ink text-acid" : "border-line-strong bg-surface"
                     }`}
                   >
                     {isSelected && <Check size={10} strokeWidth={3} />}
@@ -920,9 +916,9 @@ function OptionGroup({
                 )}
               </div>
               {showCounts && (
-                <div className="absolute inset-x-0 bottom-0 h-[3px] bg-line/50">
+                <div className="absolute inset-x-0 bottom-0 h-[3px] bg-line/40">
                   <div
-                    className={`vote-bar h-full ${isSelected ? "bg-brand" : "bg-brand/25"}`}
+                    className={`vote-bar h-full ${isSelected ? "bg-ink" : "bg-ink/30"}`}
                     style={{ width: `${percentage}%` }}
                   />
                 </div>
@@ -945,20 +941,14 @@ function FieldInput({
   onChange: (value: string | string[]) => void;
 }) {
   const stringValue = Array.isArray(value) ? "" : (value ?? "");
-  const inputId = `field-${field.id}`;
 
   return (
     <div>
-      <label
-        id={field.type === "multi" ? `${inputId}-label` : undefined}
-        htmlFor={field.type === "multi" ? undefined : inputId}
-        className="field-label"
-      >
+      <label className="field-label">
         {field.label} {field.required && <span className="text-coral">*</span>}
       </label>
       {field.type === "textarea" && (
         <textarea
-          id={inputId}
           value={stringValue}
           onChange={(event) => onChange(event.target.value)}
           className="field min-h-[84px]"
@@ -968,7 +958,6 @@ function FieldInput({
       )}
       {field.type === "text" && (
         <input
-          id={inputId}
           value={stringValue}
           onChange={(event) => onChange(event.target.value)}
           className="field"
@@ -978,7 +967,6 @@ function FieldInput({
       )}
       {field.type === "number" && (
         <input
-          id={inputId}
           value={stringValue}
           onChange={(event) => onChange(event.target.value)}
           inputMode="decimal"
@@ -988,7 +976,6 @@ function FieldInput({
       )}
       {field.type === "select" && (
         <select
-          id={inputId}
           value={stringValue}
           onChange={(event) => onChange(event.target.value)}
           className="field"
@@ -1002,12 +989,7 @@ function FieldInput({
         </select>
       )}
       {field.type === "multi" && (
-        <div
-          id={inputId}
-          role="group"
-          aria-labelledby={`${inputId}-label`}
-          className="flex flex-wrap gap-2"
-        >
+        <div className="flex flex-wrap gap-2">
           {field.options.map((option) => {
             const values = Array.isArray(value) ? value : [];
             const active = values.includes(option);
@@ -1018,10 +1000,10 @@ function FieldInput({
                 onClick={() =>
                   onChange(active ? values.filter((item) => item !== option) : [...values, option])
                 }
-                className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] transition-colors ${
+                className={`flex items-center gap-1.5 border px-2.5 py-1.5 text-[11px] transition-colors ${
                   active
-                    ? "border-brand bg-brand text-white"
-                    : "border-line-strong bg-surface hover:border-brand/50"
+                    ? "border-ink bg-ink text-paper"
+                    : "border-line-strong bg-paper hover:border-ink"
                 }`}
               >
                 {active && <Check size={10} />}
@@ -1047,10 +1029,10 @@ function LockedPanel({
   totalVotes: number;
 }) {
   return (
-    <div className="rounded-xl border border-line bg-surface shadow-[var(--shadow-soft)]">
+    <div className="border border-line bg-surface">
       <div className="border-b border-line px-5 py-5 md:px-6">
         <div className="flex items-start gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-ink bg-paper">
             <Lock size={15} />
           </span>
           <div>
@@ -1085,8 +1067,8 @@ function LockedPanel({
                     {option.votes} 票 · {percentage}%
                   </span>
                 </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-paper-deep">
-                  <div className="vote-bar h-full rounded-full bg-brand" style={{ width: `${percentage}%` }} />
+                <div className="h-2.5 bg-paper-deep">
+                  <div className="vote-bar h-full bg-ink/70" style={{ width: `${percentage}%` }} />
                 </div>
               </div>
             );

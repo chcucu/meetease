@@ -34,7 +34,7 @@ export function SuccessOverlay({
 
   return (
     <div
-      className="overlay-fade fixed inset-0 z-[90] flex items-center justify-center bg-[rgba(247,248,250,0.72)] px-6 backdrop-blur-[2px]"
+      className="overlay-fade fixed inset-0 z-[90] flex items-center justify-center bg-[rgba(242,239,230,0.72)] px-6 backdrop-blur-[2px]"
       onClick={onClose}
       role="presentation"
     >
@@ -42,11 +42,11 @@ export function SuccessOverlay({
         role="status"
         aria-live="polite"
         onClick={(event) => event.stopPropagation()}
-        className="success-pop w-full max-w-[320px] rounded-2xl border border-line bg-surface px-7 py-8 text-center shadow-[0_24px_64px_rgba(16,24,40,0.16)]"
+        className="success-pop w-full max-w-[320px] rounded-[var(--radius-card)] border border-ink bg-surface px-7 py-8 text-center shadow-[6px_6px_0_#171714]"
       >
         <span className="relative mx-auto flex h-14 w-14 items-center justify-center">
-          <span className="success-ring absolute inset-0 rounded-full border-2 border-brand/40" />
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white">
+          <span className="success-ring absolute inset-0 rounded-full border-2 border-ink/30" />
+          <span className="flex h-14 w-14 items-center justify-center rounded-full border border-ink bg-acid text-ink">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
               <path
                 className="success-check"
@@ -60,13 +60,13 @@ export function SuccessOverlay({
           </span>
         </span>
 
-        <p className="mt-5 text-[17px] font-semibold tracking-[-0.02em]">{title}</p>
-        <p className="mt-1.5 text-[12.5px] leading-6 text-muted">{description}</p>
+        <p className="mt-5 font-display text-2xl leading-tight">{title}</p>
+        <p className="mt-1.5 text-[12px] leading-6 text-muted">{description}</p>
 
         <button
           type="button"
           onClick={onClose}
-          className="btn btn-ghost btn-sm mt-5 w-full"
+          className="btn btn-dark btn-sm mt-5 w-full"
         >
           知道了
         </button>

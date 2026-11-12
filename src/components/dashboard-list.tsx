@@ -124,7 +124,7 @@ export function DashboardList({ activities }: { activities: ActivitySummary[] })
           {filtered.map((activity) => (
             <article
               key={activity.id}
-              className="group flex flex-col overflow-hidden rounded-xl border border-line bg-surface transition-all duration-200 hover:border-line-strong hover:shadow-[var(--shadow-lift)]"
+              className="group flex flex-col overflow-hidden border border-line bg-surface transition-all duration-200 hover:border-ink hover:shadow-[4px_4px_0_rgba(23,23,20,0.9)]"
             >
               <Link href={`/app/${activity.shareCode}`} className="block">
                 <CoverPoster
@@ -188,7 +188,7 @@ export function DashboardList({ activities }: { activities: ActivitySummary[] })
                     type="button"
                     onClick={() => void duplicate(activity.shareCode)}
                     disabled={copying === activity.shareCode}
-                    className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-lg border border-line-strong transition-colors hover:border-line-strong hover:bg-paper"
+                    className="flex h-[34px] w-[34px] shrink-0 items-center justify-center border border-line-strong transition-colors hover:border-ink hover:bg-paper"
                     aria-label="复制为新的决策"
                     title="复制为新的决策"
                   >
@@ -200,7 +200,7 @@ export function DashboardList({ activities }: { activities: ActivitySummary[] })
                   </button>
                   <Link
                     href={`/a/${activity.shareCode}`}
-                    className="flex h-[34px] w-[34px] items-center justify-center rounded-lg border border-line-strong transition-colors hover:border-line-strong hover:bg-paper"
+                    className="flex h-[34px] w-[34px] items-center justify-center border border-line-strong transition-colors hover:border-ink hover:bg-paper"
                     aria-label="打开参与者页面"
                   >
                     <ArrowUpRight size={14} />

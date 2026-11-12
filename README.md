@@ -138,11 +138,11 @@ curl https://quorum.tenyearmc.top/api/v1/activities/DINNER
 
 ### 6. 视觉系统
 
-- 冷白底 `#F7F8FA`、主色 `#4D6BFE`、墨色 `#0F1115`；统一使用 Geist 与 Geist Mono，移除装饰性衬线
-- 10–12px 圆角、细边框与轻阴影；封面由 CSS 渐变与 SVG 几何图案生成，无外部图片依赖
+- 暖纸底色、酸柠绿与珊瑚红；Instrument Serif / Geist / JetBrains Mono 三层字体
+- 封面由 CSS 色板、SVG 几何图案与 Q 水印生成，无外部图片依赖
 - 提交成功使用居中卡片与描线勾选动画，2.4 秒自动消散，`role="status"` 播报
 - 支持 `prefers-reduced-motion` 降级与打印样式
-- 仅保留一个正文字体家族；二维码在打开分享面板时动态加载，减少首屏体积
+- 二维码在打开分享面板时动态加载，减少首屏体积
 
 ---
 

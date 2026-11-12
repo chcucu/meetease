@@ -11,12 +11,12 @@ export default function LoginPage() {
         <>
           所有决策，
           <br />
-          集于<span className="text-[#a9bcff]">一处</span>。
+          集于<span className="text-acid">一处</span>。
         </>
       }
       asideBody="登录后，你可以查看已创建的决策、参与者、投票与支付状态。"
     >
-      <Suspense fallback={<div className="h-[420px] animate-pulse rounded-xl border border-line bg-surface" />}>
+      <Suspense fallback={<div className="h-[420px] animate-pulse border border-line bg-surface" />}>
         <LoginForm />
       </Suspense>
     </AuthLayout>

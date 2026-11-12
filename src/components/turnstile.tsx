@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type TurnstileApi = {
   render: (
@@ -57,6 +57,7 @@ export function Turnstile({
   const container = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | null>(null);
   const verifyRef = useRef(onVerify);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     verifyRef.current = onVerify;
@@ -78,9 +79,15 @@ export function Turnstile({
           sitekey: SITE_KEY,
           theme: "light",
           size: "flexible",
-          callback: (token) => verifyRef.current(token),
+          callback: (token) => {
+            setFailed(false);
+            verifyRef.current(token);
+          },
           "expired-callback": () => verifyRef.current(""),
-          "error-callback": () => verifyRef.current(""),
+          "error-callback": () => {
+            setFailed(true);
+            verifyRef.current("");
+          },
         });
       })
       .catch(() => {});
@@ -101,5 +108,24 @@ export function Turnstile({
 
   if (!SITE_KEY) return null;
 
-  return <div ref={container} className={className} aria-label="人机验证" />;
+  return (
+    <div>
+      <div ref={container} className={className} aria-label="人机验证" />
+      {failed && (
+        <button
+          type="button"
+          onClick={() => {
+            setFailed(false);
+            if (widgetId.current && window.turnstile) {
+              window.turnstile.reset(widgetId.current);
+            }
+          }}
+          className="mt-1 text-[11px] text-muted underline underline-offset-2 hover:text-ink"
+          aria-live="polite"
+        >
+          验证未能加载，点击重试
+        </button>
+      )}
+    </div>
+  );
 }
