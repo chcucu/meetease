@@ -11,18 +11,25 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare preview",
+    "cf:deploy": "opennextjs-cloudflare deploy"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.6.0",
+    "@opennextjs/cloudflare": "^1.20.17",
+    "@prisma/adapter-better-sqlite3": "^6.19.3",
+    "@prisma/adapter-d1": "^6.19.3",
+    "@prisma/client": "^6.19.3",
     "@types/leaflet": "^1.9.22",
+    "better-sqlite3": "^13.1.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.545.0",
-    "next": "16.3.3",
-    "prisma": "^6.6.0",
+    "next": "16.4.6",
+    "prisma": "^6.19.3",
     "qrcode.react": "^4.2.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -38,6 +45,7 @@
     "eslint-config-next": "16.3.3",
     "tailwindcss": "^4",
     "tsx": "^4.20.6",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.161.0"
   }
 }

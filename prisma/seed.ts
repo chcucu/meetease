@@ -1,7 +1,12 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaBetterSQLite3 } from "@prisma/adapter-better-sqlite3";
 import { hashPassword } from "../src/lib/auth";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  adapter: new PrismaBetterSQLite3({
+    url: `file:${process.cwd()}/prisma/${(process.env.DATABASE_URL ?? "file:./dev.db").replace(/^file:/, "")}`,
+  }),
+});
 
 const DAY = 24 * 60 * 60 * 1000;
 const now = Date.now();

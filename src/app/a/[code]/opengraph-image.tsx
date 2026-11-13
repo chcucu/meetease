@@ -1,6 +1,5 @@
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { ImageResponse } from "next/og";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { getActivityDetail } from "@/lib/activities";
 
 export const alt = "Quorum 决策页";
@@ -24,12 +23,30 @@ function truncate(text: string, max: number) {
   return `${chars.slice(0, max).join("")}…`;
 }
 
-let fontCache: Buffer | null | undefined;
+let fontCache: ArrayBuffer | null | undefined;
+
+function isWorkersRuntime() {
+  return typeof (globalThis as { WebSocketPair?: unknown }).WebSocketPair !== "undefined";
+}
 
 async function loadFont() {
   if (fontCache !== undefined) return fontCache;
   try {
-    fontCache = await readFile(join(process.cwd(), "src/app/a/[code]/og-font.otf"));
+    if (isWorkersRuntime()) {
+      const { env } = getCloudflareContext();
+      const response = await env.ASSETS?.fetch("https://assets.local/og-font.otf");
+      fontCache = response?.ok ? await response.arrayBuffer() : null;
+    } else {
+      // Kept behind a computed specifier so the Workers bundle never pulls in node:fs.
+      const fsModule = "node:fs/promises";
+      const pathModule = "node:path";
+      const [{ readFile }, { join }] = await Promise.all([import(fsModule), import(pathModule)]);
+      const buffer = await readFile(join(process.cwd(), "public/og-font.otf"));
+      fontCache = buffer.buffer.slice(
+        buffer.byteOffset,
+        buffer.byteOffset + buffer.byteLength
+      ) as ArrayBuffer;
+    }
   } catch {
     fontCache = null;
   }

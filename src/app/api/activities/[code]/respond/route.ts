@@ -9,8 +9,6 @@ import { respondSchema } from "@/lib/validation";
 
 type Context = { params: Promise<{ code: string }> };
 
-class ActivityClosedError extends Error {}
-
 function isEmpty(value: string | string[] | undefined) {
   if (value === undefined) return true;
   if (Array.isArray(value)) return value.filter((item) => item.trim()).length === 0;
@@ -131,68 +129,59 @@ export async function POST(request: NextRequest, context: Context) {
 
   const rankById = new Map(rankedOptionIds.map((id, index) => [id, index + 1]));
 
-  const participant = await prisma
-    .$transaction(async (tx) => {
-      const current = await tx.activity.findUnique({
-        where: { id: activity.id },
-        select: { status: true, deadline: true },
-      });
-      if (
-        !current ||
-        current.status !== "open" ||
-        (current.deadline && current.deadline.getTime() < Date.now())
-      ) {
-        throw new ActivityClosedError();
-      }
+  // D1 has no interactive transactions, so the write sequence is issued as
+  // individual statements after re-checking that voting is still open.
+  const current = await prisma.activity.findUnique({
+    where: { id: activity.id },
+    select: { status: true, deadline: true },
+  });
+  if (
+    !current ||
+    current.status !== "open" ||
+    (current.deadline && current.deadline.getTime() < Date.now())
+  ) {
+    return fail("这次活动已经结束投票了", 409);
+  }
 
-      const saved = await tx.participant.upsert({
-        where: {
-          activityId_clientKey: { activityId: activity.id, clientKey: data.clientKey },
-        },
-        create: {
-          activityId: activity.id,
-          clientKey: data.clientKey,
-          name: data.name,
-          answers: JSON.stringify(cleanAnswers),
-          condition,
-          conditionOptionId,
-        },
-        update: {
-          name: data.name,
-          answers: JSON.stringify(cleanAnswers),
-          condition,
-          conditionOptionId,
-        },
-        select: { id: true, name: true, paid: true, createdAt: true },
-      });
+  const participant = await prisma.participant.upsert({
+    where: {
+      activityId_clientKey: { activityId: activity.id, clientKey: data.clientKey },
+    },
+    create: {
+      activityId: activity.id,
+      clientKey: data.clientKey,
+      name: data.name,
+      answers: JSON.stringify(cleanAnswers),
+      condition,
+      conditionOptionId,
+    },
+    update: {
+      name: data.name,
+      answers: JSON.stringify(cleanAnswers),
+      condition,
+      conditionOptionId,
+    },
+    select: { id: true, name: true, paid: true, createdAt: true },
+  });
 
-      await tx.vote.deleteMany({ where: { participantId: saved.id } });
-      const votes = [
-        ...supportIds.map((optionId) => ({
-          participantId: saved.id,
-          optionId,
-          value: 1,
-          rank: rankById.get(optionId) ?? 0,
-        })),
-        ...vetoOptionIds.map((optionId) => ({
-          participantId: saved.id,
-          optionId,
-          value: -1,
-          rank: 0,
-        })),
-      ];
-      if (votes.length) {
-        await tx.vote.createMany({ data: votes });
-      }
-
-      return saved;
-    })
-    .catch((error: unknown) => {
-      if (error instanceof ActivityClosedError) return null;
-      throw error;
-    });
-
-  if (!participant) return fail("这次活动已经结束投票了", 409);
+  await prisma.vote.deleteMany({ where: { participantId: participant.id } });
+  const votes = [
+    ...supportIds.map((optionId) => ({
+      participantId: participant.id,
+      optionId,
+      value: 1,
+      rank: rankById.get(optionId) ?? 0,
+    })),
+    ...vetoOptionIds.map((optionId) => ({
+      participantId: participant.id,
+      optionId,
+      value: -1,
+      rank: 0,
+    })),
+  ];
+  if (votes.length) {
+    await prisma.vote.createMany({ data: votes });
+  }
 
   publish(activity.shareCode);
   const snapshot = await getSnapshot(activity.shareCode);

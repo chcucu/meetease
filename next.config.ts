@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  turbopack: {
+    resolveAlias: {
+      miniflare: "./src/lib/miniflare-stub.ts",
+    },
+  },
   async headers() {
     return [
       {
