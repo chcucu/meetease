@@ -53,8 +53,24 @@ async function loadFont() {
   return fontCache;
 }
 
+const OG_CACHE_TTL = 300;
+
+function edgeCache(): Cache | null {
+  try {
+    const storage = (globalThis as { caches?: { default?: Cache } }).caches;
+    return storage?.default ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export default async function Image({ params }: Props) {
   const { code } = await params;
+
+  const cache = edgeCache();
+  const cacheKey = new Request(`https://og-cache.quorum.local/${code.toUpperCase()}`);
+  const cached = await cache?.match(cacheKey);
+  if (cached) return cached;
 
   let title = "群组决策，一处定音";
   let shareCode = code.toUpperCase();
@@ -78,7 +94,7 @@ export default async function Image({ params }: Props) {
 
   const font = await loadFont();
 
-  return new ImageResponse(
+  const response = new ImageResponse(
     (
       <div
         style={{
@@ -225,4 +241,18 @@ export default async function Image({ params }: Props) {
         : undefined,
     }
   );
+
+  response.headers.set(
+    "Cache-Control",
+    `public, max-age=${OG_CACHE_TTL}, s-maxage=${OG_CACHE_TTL}, stale-while-revalidate=600`
+  );
+  if (cache) {
+    try {
+      await cache.put(cacheKey, response.clone());
+    } catch {
+      // Caching is best-effort.
+    }
+  }
+
+  return response;
 }

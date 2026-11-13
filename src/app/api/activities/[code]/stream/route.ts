@@ -55,13 +55,18 @@ export async function GET(request: NextRequest, context: Context) {
         void refresh();
       });
       const poll = setInterval(() => void refresh(), 10000);
-      const heartbeat = setInterval(() => write(": quorum\n\n"), 20000);
+      const heartbeat = setInterval(() => write(": quorum\n\n"), 15000);
+      // Keep each Workers invocation short-lived: long-lived streams hold an
+      // isolate's memory and eventually trip the resource limit. The client's
+      // EventSource reconnects automatically and gets a fresh snapshot.
+      const lifetime = setTimeout(() => cleanup(), 30000);
 
       cleanup = () => {
         if (closed) return;
         closed = true;
         clearInterval(poll);
         clearInterval(heartbeat);
+        clearTimeout(lifetime);
         unsubscribe();
         try {
           controller.close();
@@ -71,7 +76,7 @@ export async function GET(request: NextRequest, context: Context) {
       };
 
       request.signal.addEventListener("abort", cleanup);
-      write(`retry: 3000\n\n`);
+      write(`retry: 5000\n\n`);
       sendSnapshot(initial);
 
       if (request.signal.aborted) cleanup();
