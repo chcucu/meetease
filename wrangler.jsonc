@@ -12,10 +12,16 @@
     {
       "binding": "DB",
       "database_name": "quorum",
-      "database_id": "00000000-0000-0000-0000-000000000000"
+      "database_id": "387c1cb5-1633-4934-945c-bd05680c2902"
     }
   ],
   "observability": {
     "enabled": true
-  }
+  },
+  "routes": [
+    {
+      "pattern": "quorum.tenyearmc.top/*",
+      "zone_name": "tenyearmc.top"
+    }
+  ]
 }
